@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://gravatar.com https://*.gravatar.com; connect-src 'self' https:; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>OSINT AV2 | Pesquisa de fontes abertas</title>
+<meta name="description" content="OSINT AV2: pesquise domínios, IPs, e-mails, usuários e telefones usando apenas fontes públicas e abertas.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--black:#000;--ink:#111;--ink-2:#6b6b70;--line:rgba(0,0,0,.1);--line-dark:rgba(255,255,255,.14);--accent:#8a6420;--gold:#d6a04a;--gray:#f5f5f7;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--ease:cubic-bezier(.16,1,.3,1);--font:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+section[id]{scroll-margin-top:72px}
+body{font-family:var(--font);color:var(--ink);background:#fff;overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.55}
+h1,h2,h3{letter-spacing:-.03em;font-weight:600}
+a{text-decoration:none;color:inherit}ul{list-style:none}
+.container{max-width:1120px;margin:0 auto;padding:0 24px}
+.eyebrow{display:inline-block;font-size:.74rem;font-weight:500;color:var(--ink-2);margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 22px;border-radius:980px;font:500 .86rem var(--font);cursor:pointer;border:1px solid transparent;min-height:40px;white-space:nowrap;transition:background .3s,color .3s,border-color .3s,transform .4s var(--ease)}
+.btn:focus-visible,.chip:focus-visible,input:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.btn:active{transform:scale(.98)}
+.btn-gold{background:#fff;color:#000}.btn-gold:hover{background:#f6e6c3}
+.btn-dark{border-color:rgba(0,0,0,.2);color:var(--ink);background:transparent}.btn-dark:hover{background:var(--ink);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.scroll-progress{position:fixed;top:0;left:0;height:2px;width:100%;z-index:1200;transform:scaleX(0);transform-origin:0 50%;background:var(--gold);pointer-events:none}
+header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(0,0,0,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);padding-top:var(--safe-top)}
+nav{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 24px;max-width:1120px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:600;font-size:1rem;white-space:nowrap}
+.nav-links{display:flex;gap:30px}
+.nav-links a{color:rgba(255,255,255,.6);font-size:.8rem;padding:6px 0;transition:color .25s}
+.nav-links a:hover,.nav-links a.is-current{color:#fff}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-right .btn{padding:6px 15px;min-height:30px;font-size:.76rem}
+.burger{display:none;flex-direction:column;gap:6px;background:none;border:none;padding:10px;min-width:44px;min-height:44px;align-items:center;justify-content:center;cursor:pointer}
+.burger span{width:20px;height:1.5px;background:#fff;display:block}
+.hero{position:relative;background:var(--black);color:#fff;padding:130px 0 72px;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;left:-10%;right:-10%;top:-25%;height:85%;pointer-events:none;background:radial-gradient(ellipse 50% 60% at 50% 0%,rgba(214,160,74,.22),transparent 72%);animation:breath 9s ease-in-out infinite alternate;will-change:opacity,transform}
+@keyframes breath{from{opacity:.65;scale:1}to{opacity:1;scale:1.12}}
+@keyframes rise{from{opacity:0;transform:translate3d(0,24px,0)}to{opacity:1;transform:none}}
+.hero .container{position:relative;z-index:2}
+.hero h1{font-size:clamp(1.7rem,6vw + .2rem,3.1rem);line-height:1.1;margin-bottom:16px;animation:rise 1.1s var(--ease) .1s both}
+.hero h1 span{background:linear-gradient(100deg,#f6e3b4,#d6a04a 55%,#b8863a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero>.container>p{color:rgba(255,255,255,.62);max-width:520px;margin:0 auto 30px;font-size:1rem;animation:rise 1.1s var(--ease) .25s both}
+.search{max-width:680px;margin:0 auto;animation:rise 1.1s var(--ease) .4s both}
+.search-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);border-radius:980px;padding:6px 6px 6px 20px;transition:border-color .3s,background .3s}
+.search-box:focus-within{border-color:var(--gold);background:rgba(255,255,255,.12)}
+.search-box i.lead{color:rgba(255,255,255,.5)}
+.search-box input{flex:1;min-width:0;background:none;border:none;outline:none;color:#fff;font:400 1rem var(--font);padding:10px 0}
+.search-box input::placeholder{color:rgba(255,255,255,.4)}
+.search-box.bad{border-color:#ff9b9b}
+.detected{min-height:22px;margin-top:12px;font-size:.8rem;color:rgba(255,255,255,.6)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.chip{background:transparent;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.75);border-radius:980px;padding:6px 14px;font:400 .76rem var(--font);cursor:pointer;transition:all .3s}
+.chip:hover{border-color:#fff;color:#fff}
+.results{background:var(--gray);padding:0;display:none}
+.results.show{display:block;padding:56px 0}
+.results-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.results-head h2{font-size:clamp(1.3rem,1.8vw + .8rem,1.9rem)}
+.results-head p{color:var(--ink-2);font-size:.85rem;word-break:break-all}
+.res-actions{display:flex;gap:8px;flex-wrap:wrap}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.card{background:#fff;border-radius:14px;padding:22px;border:1px solid var(--line);min-width:0;animation:rise .7s var(--ease) both}
+.card h3{font-size:.95rem;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.card h3 i{color:var(--accent);font-size:.85rem}
+.card dl{display:grid;grid-template-columns:minmax(90px,.8fr) 2fr;gap:8px 14px;font-size:.84rem}
+.card dt{color:var(--ink-2)}
+.card dd{word-break:break-word;min-width:0}
+.note{font-size:.8rem;color:var(--ink-2);margin-top:12px}
+.err{color:#b3261e;font-size:.85rem}
+.tag{display:inline-block;background:var(--gray);border-radius:6px;padding:1px 8px;font-size:.78rem;margin:0 4px 4px 0}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.links a{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.8rem;transition:border-color .3s,background .3s}
+.links a:hover{border-color:var(--ink);background:var(--gray)}
+.loading{display:flex;align-items:center;gap:10px;color:var(--ink-2);font-size:.85rem}
+.spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+section.block{padding:76px 0}
+.alt{background:var(--gray)}
+.section-head{margin-bottom:40px}
+.section-head h2,.faq h2{font-size:clamp(1.3rem,1.8vw + .85rem,2.05rem);line-height:1.18}
+.section-head h2::after,.faq h2::after{content:'';display:block;height:2px;width:40px;margin-top:18px;background:var(--gold)}
+.grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0 20px}
+.item{border-top:1px solid var(--ink);padding-top:20px;transition:border-color .4s}
+.item:hover{border-color:var(--gold)}
+.item i{color:var(--accent);margin-bottom:14px;display:block}
+.item h3{font-size:.95rem;margin-bottom:8px}
+.item p{font-size:.83rem;color:var(--ink-2);line-height:1.55}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 28px}
+.step{border-top:1px solid var(--ink);padding-top:20px}
+.step b{display:block;font-size:.74rem;color:var(--ink-2);margin-bottom:14px;font-weight:500}
+.step h3{font-size:.95rem;margin-bottom:8px}.step p{font-size:.85rem;color:var(--ink-2)}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.faq-item{border-bottom:1px solid var(--line)}.faq-item:first-child{border-top:1px solid var(--line)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 0;width:100%;background:none;border:none;text-align:left;font:500 .93rem var(--font);color:var(--ink);cursor:pointer}
+.faq-q i{font-size:.7rem;color:var(--ink-2);transition:transform .45s var(--ease)}
+.faq-item.open .faq-q i{transform:rotate(135deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .55s var(--ease)}
+.faq-a p{padding:0 0 20px;color:var(--ink-2);font-size:.88rem;max-width:56ch}
+.aviso{background:var(--black);color:#fff;border-radius:16px;padding:32px;max-width:760px;margin:0 auto;text-align:center}
+.aviso h3{font-size:1.08rem;margin-bottom:14px}
+.aviso p{color:rgba(255,255,255,.62);font-size:.88rem;margin:0 auto 12px;max-width:60ch}
+.cta{background:var(--black);color:#fff;padding:92px 0;text-align:center;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 55% 60% at 50% 115%,rgba(214,160,74,.24),transparent 70%);animation:breath 8s ease-in-out infinite alternate;will-change:opacity,transform}
+.cta .container{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px}
+.cta h2{font-size:clamp(1.5rem,2.8vw + .6rem,2.5rem);line-height:1.12}
+.cta p{color:rgba(255,255,255,.58);max-width:46ch}
+footer{background:var(--black);color:rgba(255,255,255,.5);padding:56px 0 calc(22px + var(--safe-bottom));border-top:1px solid var(--line-dark);font-size:.8rem}
+.foot{display:grid;grid-template-columns:1.6fr 1fr;gap:30px;margin-bottom:36px}
+.foot h4{color:#fff;font-size:.74rem;font-weight:500;margin-bottom:14px}
+.foot li{margin-bottom:9px}.foot a:hover{color:#fff}
+.foot p{margin-top:12px;max-width:36ch}
+.foot-bottom{padding-top:20px;border-top:1px solid var(--line-dark);font-size:.72rem;text-align:center}
+.to-top{position:fixed;right:20px;bottom:calc(20px + var(--safe-bottom));z-index:900;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.88);backdrop-filter:blur(12px);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(12px);transition:all .4s var(--ease)}
+.to-top.show{opacity:1;visibility:visible;transform:none}
+.reveal{opacity:0;transform:translate3d(0,16px,0);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.reveal.in,.no-js .reveal{opacity:1;transform:none}
+@media(max-width:1100px){.grid5{grid-template-columns:repeat(3,minmax(0,1fr));gap:36px 24px}}
+@media(max-width:860px){.grid5{grid-template-columns:repeat(2,minmax(0,1fr))}.steps{grid-template-columns:1fr;gap:28px}.faq-grid{grid-template-columns:1fr;gap:36px}.foot{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .burger{display:flex}
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(0,0,0,.97);flex-direction:column;padding:8px 24px 24px;gap:0}
+  .nav-links.open{display:flex}.nav-links li{border-bottom:1px solid var(--line-dark)}.nav-links a{display:block;padding:14px 0;font-size:.98rem;color:#fff}
+  .nav-right .btn{display:none}
+  .hero{padding:96px 0 48px}.hero h1{white-space:nowrap}
+  section.block{padding:52px 0}.grid5{grid-template-columns:1fr;gap:28px}
+  .res-grid{grid-template-columns:1fr}.card dl{grid-template-columns:1fr;gap:2px}.card dt{margin-top:8px}
+}
+.mlist{display:flex;flex-direction:column;gap:8px}
+.mrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.mrow a{display:flex;align-items:center;gap:8px;font-size:.84rem;font-weight:500;flex:1 1 130px;min-width:0}
+.mrow a:hover{text-decoration:underline}
+.mst{flex:1 1 100%;font-size:.74rem;color:var(--ink-2)}
+.mbtn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:980px;padding:4px 12px;font:500 .74rem var(--font);cursor:pointer;min-height:30px;transition:background .25s,border-color .25s,color .25s}
+.mbtn:hover{border-color:var(--ink)}
+.mbtn.ok.on{background:#e6f4ea;border-color:#2e7d32;color:#1b5e20}
+.mbtn.no.on{background:#fdecea;border-color:#b3261e;color:#b3261e}
+.links a span{min-width:0;overflow-wrap:anywhere}
+
+
+/* ===== efeitos ===== */
+.hero::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:radial-gradient(ellipse 70% 75% at 50% 25%,#000,transparent 78%);mask-image:radial-gradient(ellipse 70% 75% at 50% 25%,#000,transparent 78%);animation:gridmove 16s linear infinite}
+@keyframes gridmove{to{background-position:44px 44px,44px 44px}}
+.hero h1 span{background-size:220% 100%;animation:goldshift 6s ease-in-out infinite alternate}
+@keyframes goldshift{from{background-position:0 0}to{background-position:100% 0}}
+header{transition:background .4s,box-shadow .4s}nav{transition:height .4s var(--ease)}
+header.scrolled{background:rgba(0,0,0,.92);box-shadow:0 1px 0 rgba(255,255,255,.08)}header.scrolled nav{height:46px}
+.search-box{position:relative;overflow:hidden;transition:border-color .3s,background .3s,box-shadow .4s}
+.search-box:focus-within{box-shadow:0 0 0 4px rgba(214,160,74,.12),0 10px 44px rgba(214,160,74,.2)}
+.search-box::after{content:'';position:absolute;left:0;bottom:0;height:2px;width:38%;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transform:translateX(-100%)}
+.search-box.busy::after{opacity:1;animation:scan 1.1s ease-in-out infinite}
+@keyframes scan{to{transform:translateX(270%)}}
+.btn{position:relative;overflow:hidden}
+.btn-gold::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(214,160,74,.5),transparent);transform:skewX(-20deg);transition:left .8s var(--ease);pointer-events:none}
+.btn-gold:hover::after{left:140%}
+.btn:hover{transform:translateY(-1px)}.btn:active{transform:scale(.98)}
+.chip{transition:all .3s,transform .4s var(--ease)}.chip:hover{transform:translateY(-2px);background:rgba(255,255,255,.08)}
+.results.show .results-head{animation:rise .8s var(--ease) both}
+.card{position:relative;overflow:hidden;animation:rise .7s var(--ease) backwards;transition:transform .5s var(--ease),box-shadow .5s,border-color .4s}
+.card:hover{transform:translateY(-3px);box-shadow:0 16px 44px rgba(0,0,0,.08);border-color:rgba(0,0,0,.2)}
+.card::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(214,160,74,.15),transparent 70%)}
+.card:hover::before{opacity:1}
+.card h3 i{transition:transform .5s var(--ease)}.card:hover h3 i{transform:scale(1.25) rotate(-8deg)}
+.links a{transition:border-color .3s,background .3s,transform .4s var(--ease)}.links a:hover{transform:translateY(-2px)}
+.skel{height:10px;border-radius:6px;margin-top:10px;background:linear-gradient(90deg,#f1f1f4 25%,#e4e4e9 50%,#f1f1f4 75%);background-size:200% 100%;animation:skl 1.3s linear infinite}
+@keyframes skl{to{background-position:-200% 0}}
+.item,.step{transition:border-color .4s,transform .5s var(--ease)}.item:hover,.step:hover{transform:translateY(-4px)}
+.aviso{transition:transform .6s var(--ease),box-shadow .6s}.aviso:hover{transform:translateY(-3px);box-shadow:0 20px 60px rgba(214,160,74,.12)}
+.toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-bottom));transform:translate(-50%,20px);background:#000;color:#fff;padding:10px 18px;border-radius:980px;font-size:.82rem;opacity:0;pointer-events:none;transition:opacity .4s,transform .5s var(--ease);z-index:1300;border:1px solid var(--line-dark);max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}.card:hover,.links a:hover,.item:hover,.step:hover,.btn:hover{transform:none}}
+.lab{background:var(--gray);border:1px solid var(--line);border-radius:20px;padding:24px;color:var(--ink)}
+.lab h2{font-size:1.4rem}.lab-sub{color:var(--ink-2);font-size:.88rem;margin:6px 0 16px}
+.lab-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.lab-tabs .btn.on{outline:2px solid var(--gold);outline-offset:2px}
+.lab-panel{display:none}.lab-panel.on{display:block}
+#gsvg{display:block;width:100%;height:520px;background:#fff;border:1px solid var(--line);border-radius:14px;touch-action:none;cursor:grab}
+.lg{display:flex;flex-wrap:wrap;gap:12px;font-size:.76rem;margin:10px 0}.lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.lab select{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);max-width:100%}
+.lrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.it{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding:10px 0;font-size:.84rem}
+.df{border-top:1px solid var(--line);padding:8px 0;font-size:.82rem;word-break:break-word}
+.bd{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:600;margin-right:6px;color:#fff}
+.lab .note{color:var(--ink-2);font-size:.8rem}
+</style>
+</head>
+<body class="no-js">
+<div class="scroll-progress" id="prog" aria-hidden="true"></div>
+<header id="header">
+  <nav aria-label="Navegação principal">
+    <a href="#inicio" class="logo" aria-label="OSINT AV2 — início"><span>OSINT <b>AV2</b></span></a>
+    <div class="nav-right">
+      <a href="https://wa.me/5581989685899?text=Ol%C3%A1%21%20Vim%20pelo%20site%20OSINT%20AV2." target="_blank" rel="noopener noreferrer" class="btn btn-gold">Fale Conosco</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="inicio">
+  <div class="container">
+    <h1>INTELIGÊNCIA EM<br>FONTES <span>ABERTAS</span></h1>
+   <p>Pesquise domínios, IPs, e-mails, usuários, telefones e CNPJ.<br>Tudo com dados públicos, em segundos.</p>
+    <form class="search" id="form" novalidate>
+      <div class="search-box" id="box">
+        <i class="fa-solid fa-magnifying-glass lead" aria-hidden="true"></i>
+        <label for="q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Alvo da pesquisa</label>
+        <input id="q" type="text" placeholder="Domínio, IP, e-mail, @usuário, telefone ou CNPJ" autocomplete="off" spellcheck="false" maxlength="254">
+        <button type="submit" class="btn btn-gold" id="go">Pesquisar</button>
+      </div>
+      <p class="detected" id="detected" role="status" aria-live="polite"></p>
+      <div class="chips" id="chips" aria-label="Exemplos"><button type="button" class="chip" data-q="example.com">example.com</button><button type="button" class="chip" data-q="00.000.000/0001-91">CNPJ</button><button type="button" class="chip" data-q="1.1.1.1">1.1.1.1</button><button type="button" class="chip" data-q="2001:4860:4860::8888">IPv6</button><button type="button" class="chip" data-q="@github">@github</button></div>
+    </form>
+  </div>
+</section>
+
+<section class="results" id="results" aria-live="polite">
+  <div class="container">
+    <div class="results-head">
+      <div><h2>Resultados</h2><p id="target"></p></div>
+      <div class="res-actions">
+        <button type="button" class="btn btn-dark" id="copy"><i class="fa-regular fa-copy"></i> Copiar JSON</button>
+        <button type="button" class="btn btn-dark" id="dl"><i class="fa-solid fa-download"></i> Baixar JSON</button>
+        <button type="button" class="btn btn-dark" id="gr"><i class="fa-solid fa-diagram-project"></i> Grafo</button>
+        <button type="button" class="btn btn-dark" id="sv"><i class="fa-regular fa-floppy-disk"></i> Salvar</button>
+        <button type="button" class="btn btn-dark" id="mn"><i class="fa-regular fa-bell"></i> Monitorar</button>
+      </div>
+    </div>
+    <div class="res-grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="block" id="lab">
+  <div class="container"><div class="lab">
+    <h2>Laboratório de investigação</h2>
+    <p class="lab-sub">Visualize conexões, compare investigações e acompanhe alterações em indicadores públicos. Tudo fica salvo apenas neste navegador.</p>
+    <div class="lab-tabs">
+      <button type="button" class="btn btn-dark on" data-tab="graph">Grafo</button>
+      <button type="button" class="btn btn-dark" data-tab="cmp">Comparar</button>
+      <button type="button" class="btn btn-dark" data-tab="mon">Monitoramento e alertas</button>
+      <button type="button" class="btn btn-dark" data-tab="inv">Investigações salvas</button>
+    </div>
+    <div class="lab-panel on" id="p-graph">
+      <div class="lrow"><label for="gsrc">Fonte:</label><select id="gsrc"></select><button type="button" class="btn btn-dark" id="gdraw">Desenhar</button><button type="button" class="btn btn-dark" id="gfit">Ajustar</button><button type="button" class="btn btn-dark" id="gsvgx">Exportar SVG</button></div>
+      <svg id="gsvg" viewBox="-300 -260 600 520" role="img" aria-label="Grafo de relações"></svg>
+      <div class="lg" id="glegend"></div>
+      <p class="note" id="ginfo">Faça uma pesquisa e clique em Grafo.</p>
+    </div>
+    <div class="lab-panel" id="p-cmp">
+      <div class="lrow"><select id="cmpA" aria-label="Investigação A"></select><span>×</span><select id="cmpB" aria-label="Investigação B"></select><button type="button" class="btn btn-dark" id="cmpgo">Comparar</button></div>
+      <p class="note">Mostra o que mudou entre duas investigações (do mesmo alvo em datas diferentes) e o que há em comum entre alvos diferentes, como IPs, servidores DNS e provedores compartilhados.</p>
+      <div id="cmp-out"></div>
+    </div>
+    <div class="lab-panel" id="p-mon">
+      <div class="lrow"><button type="button" class="btn btn-dark" id="monall">Verificar todos</button><button type="button" class="btn btn-dark" id="monexp">Exportar JSON</button></div>
+      <p class="note">O monitoramento compara a pesquisa atual com a anterior (DNS, servidores, registro, expiração, hospedagem, ASN e mais). Ele roda no navegador: as verificações acontecem quando você clica em Verificar. Alertas automáticos em segundo plano exigem um Worker agendado.</p>
+      <div id="mon-list"></div>
+    </div>
+    <div class="lab-panel" id="p-inv"><div id="inv-list"></div></div>
+  </div></div>
+</section>
+
+<section class="block" id="aviso">
+  <div class="container">
+    <div class="aviso reveal">
+      <h3>Uso responsável</h3>
+      <p>O OSINT AV2 reúne informações disponíveis em fontes públicas. O cruzamento de dados pode afetar a privacidade de terceiros. O usuário é responsável pelas consultas e deve respeitar a legislação vigente e os limites éticos de uso.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-bottom">© <span id="year">2026</span> AV2 COMPANY. Todos os direitos reservados.</div>
+  </div>
+</footer>
+<button type="button" class="to-top" id="toTop" aria-label="Voltar ao topo"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i></button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+document.body.classList.remove('no-js');
+var $=function(id){return document.getElementById(id)};
+$('year').textContent=new Date().getFullYear();
+
+/*PURE*/
+var RE={email:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i,ipv4:/^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/,ipv6:/^[0-9a-f:]+$/i,domain:/^(?=.{4,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i,user:/^@?[a-z0-9._-]{2,40}$/i};
+/* ===== IP: tabelas de faixas especiais, parser tolerante e classificação ===== */
+var DOC4='Reservado para exemplos em manuais e tutoriais. Nunca aparece em uso real; se surgiu em um log, pode ser dado de teste ou endereço falsificado.';
+var V4T=[
+['0.0.0.0',8,'Esta rede / não especificado','Especial','RFC 1122','Usado como origem "qualquer endereço" ou "ainda sem endereço". Não identifica nenhum host.',0,'reservado'],
+['10.0.0.0',8,'Privado (RFC 1918)','Rede local','RFC 1918','Faixa de redes internas (casa, empresa, VPN, nuvem privada). É reutilizada por milhões de redes, então sozinha não identifica ninguém.',0,'privado'],
+['100.64.0.0',10,'Espaço compartilhado (CGNAT)','Rede da operadora','RFC 6598','Usado por provedores para colocar vários clientes atrás de um mesmo IP público (NAT de operadora). Comum em internet móvel e em alguns planos de fibra e rádio.',0,'cgnat'],
+['127.0.0.0',8,'Loopback (localhost)','O próprio aparelho','RFC 1122','Aponta sempre para o aparelho que fez a consulta. Nunca sai para a rede.',0,'loopback'],
+['169.254.0.0',16,'Link-local (APIPA)','Mesmo segmento de rede','RFC 3927','Atribuído automaticamente quando o aparelho não conseguiu IP por DHCP. Costuma indicar falha de configuração na rede.',0,'linklocal'],
+['169.254.169.254',32,'Metadados de nuvem','Máquina virtual em nuvem','Convenção dos provedores','Endereço interno de metadados de instâncias AWS, Azure, Google Cloud e outras. Só responde de dentro da própria máquina virtual.',0,'reservado'],
+['172.16.0.0',12,'Privado (RFC 1918)','Rede local','RFC 1918','Faixa de redes internas (casa, empresa, VPN, nuvem privada). É reutilizada por milhões de redes, então sozinha não identifica ninguém.',0,'privado'],
+['192.0.0.0',24,'Atribuições de protocolo IETF','Especial','RFC 6890','Reservado para protocolos da IETF (ex.: DS-Lite). Não é usado em hosts comuns.',0,'reservado'],
+['192.0.2.0',24,'Documentação (TEST-NET-1)','Exemplos de manuais','RFC 5737',DOC4,0,'documentacao'],
+['192.88.99.0',24,'Relay 6to4 (obsoleto)','Anycast legado','RFC 7526','Antigo endereço anycast de relays 6to4, já desativado.',0,'reservado'],
+['192.168.0.0',16,'Privado (RFC 1918)','Rede local','RFC 1918','Faixa mais comum em roteadores domésticos e de pequenos escritórios. Reutilizada por milhões de redes.',0,'privado'],
+['198.18.0.0',15,'Testes de desempenho','Laboratório','RFC 2544','Reservado para testes de equipamentos de rede. Não deve circular na internet.',0,'reservado'],
+['198.51.100.0',24,'Documentação (TEST-NET-2)','Exemplos de manuais','RFC 5737',DOC4,0,'documentacao'],
+['203.0.113.0',24,'Documentação (TEST-NET-3)','Exemplos de manuais','RFC 5737',DOC4,0,'documentacao'],
+['224.0.0.0',4,'Multicast','Grupo de destinos','RFC 5771','Endereço de grupo: um pacote chega a vários receptores. Não pertence a um aparelho específico.',0,'multicast'],
+['224.0.0.0',24,'Multicast da rede local','Mesmo segmento de rede','RFC 5771','Protocolos de rede local (ex.: 224.0.0.251 é mDNS/Bonjour, 224.0.0.1 é "todos os hosts").',0,'multicast'],
+['239.0.0.0',8,'Multicast administrativo','Dentro de uma organização','RFC 2365','Multicast de escopo restrito a uma organização.',0,'multicast'],
+['240.0.0.0',4,'Reservado (classe E)','Uso futuro','RFC 1112','Faixa reservada, não utilizável em redes públicas.',0,'reservado'],
+['255.255.255.255',32,'Broadcast limitado','Mesmo segmento de rede','RFC 919','Destino que alcança todos os aparelhos da rede local.',0,'broadcast']
+];
+var V6T=[
+['::',128,'Não especificado','Especial','RFC 4291','Equivale a 0.0.0.0: "sem endereço". Não identifica nenhum host.',0,'reservado'],
+['::1',128,'Loopback (localhost)','O próprio aparelho','RFC 4291','Equivale a 127.0.0.1. Aponta para o próprio aparelho.',0,'loopback'],
+['::',96,'IPv4-compatível (obsoleto)','Especial','RFC 4291','Formato antigo que embutia um IPv4 nos últimos 32 bits. Descontinuado.',0,'reservado','compat'],
+['::ffff:0:0',96,'IPv4 mapeado em IPv6','Especial','RFC 4291','Representa um endereço IPv4 dentro de uma pilha IPv6 (::ffff:a.b.c.d).',0,'reservado','mapped'],
+['64:ff9b::',96,'NAT64 (prefixo padrão)','Tradução IPv6 para IPv4','RFC 6052','Os últimos 32 bits são um endereço IPv4 acessado por meio de um gateway NAT64. O IPv4 real está embutido.',1,'publico','nat64'],
+['64:ff9b:1::',48,'NAT64 de uso local','Rede da operadora','RFC 8215','Prefixo local de tradução NAT64.',0,'reservado'],
+['100::',64,'Descarte (discard-only)','Blackhole','RFC 6666','Tráfego enviado para cá é descartado pelos roteadores.',0,'reservado'],
+['2001::',32,'Teredo (túnel IPv6 sobre IPv4)','Túnel','RFC 4380','Embute o servidor Teredo e o IPv4 público (e a porta) do cliente. Dá para extrair o IPv4 real de quem usa o túnel.',1,'tunel','teredo'],
+['2001:2::',48,'Testes de desempenho','Laboratório','RFC 5180','Reservado para testes de equipamentos de rede. Não deve circular na internet.',0,'reservado'],
+['2001:10::',28,'ORCHID (obsoleto)','Identificadores criptográficos','RFC 4843','Não roteável: serve como identificador, não como endereço.',0,'reservado'],
+['2001:20::',28,'ORCHIDv2','Identificadores criptográficos','RFC 7343','Não roteável: serve como identificador, não como endereço.',0,'reservado'],
+['2001:db8::',32,'Documentação','Exemplos de manuais','RFC 3849',DOC4,0,'documentacao'],
+['2002::',16,'6to4 (túnel IPv6 sobre IPv4)','Túnel','RFC 3056','Os bits 17 a 48 contêm o IPv4 público de quem usa o túnel, então o IPv4 real fica exposto no próprio endereço.',1,'tunel','6to4'],
+['3fff::',20,'Documentação','Exemplos de manuais','RFC 9637',DOC4,0,'documentacao'],
+['fc00::',7,'ULA (privado)','Rede local','RFC 4193','Equivalente IPv6 dos endereços privados do IPv4 (10.x, 192.168.x). Não é roteado na internet.',0,'privado',null,1],
+['fe80::',10,'Link-local','Mesmo segmento de rede','RFC 4291','Gerado automaticamente em toda interface IPv6 e válido só dentro do enlace. Costuma derivar do MAC ou ser aleatório.',0,'linklocal',null,1],
+['fec0::',10,'Site-local (obsoleto)','Rede local','RFC 3879','Antigo equivalente dos endereços privados, descontinuado.',0,'privado'],
+['ff00::',8,'Multicast','Grupo de destinos','RFC 4291','Endereço de grupo: um pacote chega a vários receptores. Não pertence a um aparelho específico.',0,'multicast'],
+['2000::',3,'Unicast global','Internet pública','RFC 4291 / IANA','Endereço roteável na internet.',1,'publico',null,1]
+];
+function hx(n,l){var s=n.toString(16);while(s.length<l)s='0'+s;return s}
+function v4parts(s){
+  var a=String(s).split('.');if(a.length!==4)return null;
+  var n=[];
+  for(var i=0;i<4;i++){
+    var x=a[i];
+    if(/^0x[0-9a-f]{1,2}$/i.test(x))n.push(parseInt(x,16));
+    else if(/^\d{1,3}$/.test(x))n.push(parseInt(x,10));
+    else return null;
+    if(n[i]>255)return null;
+  }
+  return n;
+}
+function v4num(o){return((o[0]*256+o[1])*256+o[2])*256+o[3]}
+function v4str(n){return[Math.floor(n/16777216)%256,Math.floor(n/65536)%256,Math.floor(n/256)%256,n%256].join('.')}
+function v6groups(s){
+  s=String(s).toLowerCase();
+  if(!/^[0-9a-f:.]+$/.test(s)||s.indexOf(':')<0)return null;
+  var m=s.match(/^(.*:)(\d{1,3}(?:\.\d{1,3}){3})$/);
+  if(m){var o=v4parts(m[2]);if(!o)return null;s=m[1]+hx(o[0]*256+o[1],1)+':'+hx(o[2]*256+o[3],1)}
+  if(s.indexOf(':::')>-1||s.indexOf('.')>-1)return null;
+  var dc=s.split('::');if(dc.length>2)return null;
+  var head=dc[0]?dc[0].split(':'):[],tail=(dc.length===2&&dc[1])?dc[1].split(':'):[],g;
+  if(dc.length===2){var miss=8-head.length-tail.length;if(miss<1)return null;var z=[];for(var i=0;i<miss;i++)z.push('0');g=head.concat(z,tail)}else g=head;
+  if(g.length!==8)return null;
+  var r=[];for(var j=0;j<8;j++){if(!/^[0-9a-f]{1,4}$/.test(g[j]))return null;r.push(parseInt(g[j],16))}
+  return r;
+}
+function v6full(g){return g.map(function(x){return hx(x,4)}).join(':')}
+function v6short(g){
+  var best=-1,bl=0,cur=-1,cl=0;
+  for(var i=0;i<8;i++){if(g[i]===0){if(cur<0){cur=i;cl=0}cl++;if(cl>bl){bl=cl;best=cur}}else cur=-1}
+  var h=g.map(function(x){return x.toString(16)});
+  if(bl<2)return h.join(':');
+  return h.slice(0,best).join(':')+'::'+h.slice(best+bl).join(':');
+}
+function v6bits(g){return g.map(function(x){var s=x.toString(2);while(s.length<16)s='0'+s;return s}).join('')}
+function arpa(ip){
+  if(/^\d+\.\d+\.\d+\.\d+$/.test(ip))return ip.split('.').reverse().join('.')+'.in-addr.arpa';
+  var g=v6groups(ip);if(!g)return null;
+  return v6full(g).replace(/:/g,'').split('').reverse().join('.')+'.ip6.arpa';
+}
+/* aceita: IPv4/IPv6, [v6]:porta, v4:porta, URL, CIDR, hexadecimal, IPv6 com zona (%eth0) ou com IPv4 embutido, "ip: x" */
+function parseIP(raw){
+  var q=String(raw).trim(),notes=[],cidr=null;
+  if(!q||q.length>120)return null;
+  q=q.replace(/^(?:ipv?[46]?|endere[cç]o)(?:\s*[:=]\s*|\s+)/i,'');
+  var um=q.match(/^[a-z][a-z0-9+.-]*:\/\/(?:[^@\/?#]*@)?(\[[^\]]+\]|[^\/?#:]+)(?::\d+)?(?:[\/?#].*)?$/i);
+  if(um){q=um[1];notes.push('Endereço extraído de uma URL')}
+  var bm=q.match(/^\[([^\]]+)\](?::\d+)?$/);if(bm){q=bm[1];notes.push('Colchetes e porta ignorados')}
+  var cm=q.match(/^(.+)\/(\d{1,3})$/);if(cm){q=cm[1];cidr=+cm[2]}
+  var pm=q.match(/^(\d{1,3}(?:\.\d{1,3}){3}):(\d{1,5})$/);if(pm){q=pm[1];notes.push('Porta '+pm[2]+' ignorada')}
+  if(q.indexOf(':')>-1&&/%[0-9a-z._~-]+$/i.test(q)){q=q.replace(/%[0-9a-z._~-]+$/i,'');notes.push('Identificador de zona removido')}
+  var o=null,g=null;
+  if(/^0x[0-9a-f]{4,8}$/i.test(q)){var nn=parseInt(q,16);o=[Math.floor(nn/16777216)%256,Math.floor(nn/65536)%256,Math.floor(nn/256)%256,nn%256];notes.push('Formato hexadecimal convertido')}
+  else if(q.indexOf(':')>-1)g=v6groups(q);
+  else o=v4parts(q);
+  if(!o&&!g)return null;
+  if(o&&/(^|\.)0\d/.test(q))notes.push('Zeros à esquerda ignorados (lido como decimal)');
+  if(g&&!g[0]&&!g[1]&&!g[2]&&!g[3]&&!g[4]&&g[5]===65535){o=[g[6]>>8,g[6]&255,g[7]>>8,g[7]&255];g=null;notes.push('IPv4 mapeado em IPv6 convertido para IPv4')}
+  if(cidr!==null&&cidr>(o?32:128))return null;
+  var v=o?o.join('.'):v6short(g),label=o?'Endereço IPv4':'Endereço IPv6';
+  if(cidr!==null){label+=' (faixa /'+cidr+')';notes.push('Faixa informada: pesquisando o endereço '+v+'. Para a faixa inteira, veja o bloco e o ASN nos cards')}
+  return{type:'ip',value:v,label:label,note:notes,cidr:cidr};
+}
+function ipInfo(v){
+  var o=v4parts(v),i,best=null,bl=-1;
+  if(o){
+    var n=v4num(o);
+    for(i=0;i<V4T.length;i++){var e=V4T[i],sh=Math.pow(2,32-e[1]);if(Math.floor(n/sh)===Math.floor(v4num(v4parts(e[0]))/sh)&&e[1]>bl){best=e;bl=e[1]}}
+    var cl=best?{nome:best[2],escopo:best[3],rfc:best[4],desc:best[5],pub:!!best[6],kind:best[7]}:{nome:'Público (unicast global)',escopo:'Internet pública',rfc:'IANA',desc:'Endereço roteável na internet. Pode ter geolocalização aproximada, provedor, ASN e histórico público.',pub:true,kind:'publico'};
+    return{ver:4,o:o,n:n,cls:cl,pub:cl.pub,arpa:arpa(v)};
+  }
+  var g=v6groups(v);if(!g)return null;
+  var bb=v6bits(g);
+  for(i=0;i<V6T.length;i++){var f=V6T[i];if(f[1]>bl&&bb.slice(0,f[1])===v6bits(v6groups(f[0])).slice(0,f[1])){best=f;bl=f[1]}}
+  var c6=best?{nome:best[2],escopo:best[3],rfc:best[4],desc:best[5],pub:!!best[6],kind:best[7],iid:!!best[9]}:{nome:'Reservado pela IETF/IANA',escopo:'Não alocado',rfc:'IANA',desc:'Fora de 2000::/3 e das faixas especiais: ainda não alocado para uso na internet.',pub:false,kind:'reservado'};
+  var emb=null,t=best&&best[8];
+  if(t==='6to4')emb={tipo:'6to4',ipv4:[g[1]>>8,g[1]&255,g[2]>>8,g[2]&255].join('.')};
+  else if(t==='teredo')emb={tipo:'Teredo (cliente)',ipv4:[(g[6]>>8)^255,(g[6]&255)^255,(g[7]>>8)^255,(g[7]&255)^255].join('.'),servidor:[g[2]>>8,g[2]&255,g[3]>>8,g[3]&255].join('.'),porta:g[5]^65535};
+  else if(t)emb={tipo:t==='nat64'?'NAT64':t==='mapped'?'mapeado':'compatível',ipv4:[g[6]>>8,g[6]&255,g[7]>>8,g[7]&255].join('.')};
+  return{ver:6,g:g,full:v6full(g),short:v6short(g),cls:c6,pub:c6.pub,emb:emb,arpa:arpa(v)};
+}
+function detect(raw){
+  /* aceita notação "defanged" de relatórios de ameaça: 8.8.8[.]8, example[.]com, hxxp:// */
+  raw=String(raw).replace(/\[\.\]|\(\.\)|\{\.\}|\[dot\]|\(dot\)/gi,'.').replace(/^(\s*)hxxp/i,'$1http');
+  var ip=parseIP(raw);return ip||detectBase(raw);
+}
+function detectBase(raw){
+  var q=String(raw).trim();if(!q)return null;
+  var cd=q.replace(/[.\/\s-]/g,'');
+  if(/^[\d.\/\s-]+$/.test(q)&&/^\d{14}$/.test(cd)&&cnpjOk(cd))return{type:'cnpj',value:cd,label:'CNPJ'};
+  var br6=q.match(/^\[([0-9a-f:.]+)\](?::\d+)?$/i);if(br6)q=br6[1];
+  var m4=q.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i);if(m4)q=m4[1];
+  if(RE.email.test(q)&&!/^\.|\.@|\.\./.test(q))return{type:'email',value:q.toLowerCase(),label:'E-mail'};
+  if(RE.ipv4.test(q))return{type:'ip',value:q.split('.').map(Number).join('.'),label:'Endereço IPv4'};
+  if(q.split(':').length>2&&RE.ipv6.test(q)&&validV6(q))return{type:'ip',value:q.toLowerCase(),label:'Endereço IPv6'};
+  var digits=q.replace(/[\s().+-]/g,'');
+  if(/^[\d\s().+-]+$/.test(q)){
+    // 00 = prefixo internacional; 0 = prefixo nacional (ex.: 081 99999-1234)
+    digits=digits.replace(/^00/,'').replace(/^0+/,'');
+    if(/^\d{10,13}$/.test(digits))return{type:'phone',value:digits,label:'Telefone'};
+  }
+  if(/^[\d.]+$/.test(q))return null;
+  if(q.charAt(0)==='@'&&RE.user.test(q))return{type:'user',value:q.slice(1),label:'Nome de usuário'};
+  var host=q.replace(/^[a-z]+:\/\//i,'').split(/[\/?#]/)[0].replace(/^www\./i,'').replace(/:\d+$/,'').replace(/\.$/,'').toLowerCase();
+  if(/[^\x00-\x7f]/.test(host)){try{host=new URL('http://'+host).hostname}catch(e){}}
+  if(RE.domain.test(host))return{type:'domain',value:host,label:'Domínio'};
+  if(RE.user.test(q))return{type:'user',value:q,label:'Nome de usuário'};
+  return null;
+}
+var BLOCKED='av2company.com.br';
+function isBlocked(t){var v=String(t&&t.value||'').toLowerCase();if(t&&t.type==='email')v=v.split('@')[1]||'';return v===BLOCKED||v.slice(-(BLOCKED.length+1))==='.'+BLOCKED}
+function cnpjOk(d){
+  if(!/^\d{14}$/.test(d)||/^(\d)\1+$/.test(d))return false;
+  var w1=[5,4,3,2,9,8,7,6,5,4,3,2],w2=[6].concat(w1),n=d.split('').map(Number);
+  function dv(w){var t=0;for(var i=0;i<w.length;i++)t+=n[i]*w[i];var r=t%11;return r<2?0:11-r}
+  return dv(w1)===n[12]&&dv(w2)===n[13];
+}
+function validV6(q){try{new URL('http://['+q+']/');return true}catch(e){return false}}
+function isPrivate(ip){var i=ipInfo(ip);return i?!i.pub:true}
+function isPrivateOld(ip){
+  return /^(10\.|127\.|0\.|169\.254\.|192\.168\.|192\.0\.0\.|192\.0\.2\.|198\.51\.100\.|203\.0\.113\.|198\.1[89]\.|2(2[4-9]|[3-5]\d)\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(ip)||/^2001:0?db8:/i.test(ip)||ip==='::1'||ip==='::'||/^f[cd]/i.test(ip)||/^fe80/i.test(ip);
+}
+var UF={SP:[11,12,13,14,15,16,17,18,19],RJ:[21,22,24],ES:[27,28],MG:[31,32,33,34,35,37,38],PR:[41,42,43,44,45,46],SC:[47,48,49],RS:[51,53,54,55],DF:[61],GO:[62,64],TO:[63],MT:[65,66],MS:[67],AC:[68],RO:[69],BA:[71,73,74,75,77],SE:[79],PE:[81,87],PB:[83],AL:[82],RN:[84],CE:[85,88],PI:[86,89],PA:[91,93,94],AM:[92,97],RR:[95],AP:[96],MA:[98,99]};
+function ufOf(ddd){var n=+ddd;for(var k in UF){if(UF[k].indexOf(n)>-1)return k}return ''}
+function phoneInfo(d){
+  var cc='',nat=d;
+  if(d.length>=12&&d.indexOf('55')===0){cc='55';nat=d.slice(2)}
+  else if(d.length>11){cc=d.slice(0,d.length-10);nat=d.slice(-10)}
+  if(!cc&&d.length===11&&d.charAt(2)!=='9'){cc=d.charAt(0);}
+  var br=(cc==='55'||(!cc&&(d.length===10||d.length===11)));
+  if(!br){var cn=ccName(d);return{br:false,cc:cn?cn.cc:cc,full:d}}
+  var ddd=nat.slice(0,2),num=nat.slice(2),uf=ufOf(ddd);
+  var tipo=num.length===9&&num[0]==='9'?'Celular':(num.length===8&&/^[2-5]/.test(num)?'Fixo':'Indefinido');
+  return{br:true,cc:'55',ddd:ddd,uf:uf,dddOk:!!uf,num:num,tipo:tipo,local:num.slice(0,num.length-4)+'-'+num.slice(-4),full:'55'+ddd+num};
+}
+var DISPOSABLE=['mailinator.com','10minutemail.com','guerrillamail.com','tempmail.com','temp-mail.org','yopmail.com','trashmail.com','sharklasers.com','getnada.com','throwawaymail.com','maildrop.cc','dispostable.com','fakeinbox.com'];
+/*END*/
+var DDDR={11:'São Paulo e Grande SP',12:'Vale do Paraíba (São José dos Campos)',13:'Baixada Santista',14:'Bauru e Marília',15:'Sorocaba',16:'Ribeirão Preto e São Carlos',17:'São José do Rio Preto',18:'Presidente Prudente e Araçatuba',19:'Campinas e Piracicaba',21:'Rio de Janeiro e Grande RJ',22:'Campos dos Goytacazes e Região dos Lagos',24:'Volta Redonda e Petrópolis',27:'Vitória e Grande Vitória',28:'Cachoeiro de Itapemirim',31:'Belo Horizonte e região',32:'Juiz de Fora',33:'Governador Valadares',34:'Uberlândia e Uberaba',35:'Poços de Caldas e Pouso Alegre',37:'Divinópolis',38:'Montes Claros',41:'Curitiba e região',42:'Ponta Grossa',43:'Londrina',44:'Maringá',45:'Cascavel e Foz do Iguaçu',46:'Pato Branco e Francisco Beltrão',47:'Joinville e Blumenau',48:'Florianópolis e região',49:'Chapecó e Lages',51:'Porto Alegre e região',53:'Pelotas',54:'Caxias do Sul',55:'Santa Maria',61:'Brasília e entorno',62:'Goiânia e região',63:'Tocantins (Palmas)',64:'Rio Verde e Catalão',65:'Cuiabá e região',66:'Rondonópolis',67:'Campo Grande e região',68:'Acre (Rio Branco)',69:'Rondônia (Porto Velho)',71:'Salvador e região',73:'Ilhéus e Porto Seguro',74:'Juazeiro e Jacobina',75:'Feira de Santana',77:'Vitória da Conquista e Barreiras',79:'Sergipe (Aracaju)',81:'Recife e região (inclui Zona da Mata)',82:'Alagoas (Maceió)',83:'Paraíba (João Pessoa e Campina Grande)',84:'Rio Grande do Norte (Natal)',85:'Fortaleza e região',86:'Teresina e Piauí norte',87:'Petrolina, Garanhuns e Sertão de PE',88:'Juazeiro do Norte e Sobral',89:'Picos e Floriano',91:'Belém e região',92:'Manaus e região',93:'Santarém',94:'Marabá',95:'Roraima (Boa Vista)',96:'Amapá (Macapá)',97:'Interior do Amazonas (Tefé, Coari)',98:'São Luís e região',99:'Imperatriz e Caxias (MA)'};
+var UFN={AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
+var UFTZ={AC:['America/Rio_Branco','UTC-5'],AM:['America/Manaus','UTC-4'],RO:['America/Porto_Velho','UTC-4'],RR:['America/Boa_Vista','UTC-4'],MT:['America/Cuiaba','UTC-4'],MS:['America/Campo_Grande','UTC-4']};
+var CCT={'1':'EUA / Canadá (+1)','7':'Rússia / Cazaquistão','20':'Egito','27':'África do Sul','30':'Grécia','31':'Países Baixos','32':'Bélgica','33':'França','34':'Espanha','36':'Hungria','39':'Itália','40':'Romênia','41':'Suíça','43':'Áustria','44':'Reino Unido','45':'Dinamarca','46':'Suécia','47':'Noruega','48':'Polônia','49':'Alemanha','51':'Peru','52':'México','53':'Cuba','54':'Argentina','56':'Chile','57':'Colômbia','58':'Venezuela','60':'Malásia','61':'Austrália','62':'Indonésia','63':'Filipinas','64':'Nova Zelândia','65':'Singapura','66':'Tailândia','81':'Japão','82':'Coreia do Sul','84':'Vietnã','86':'China','90':'Turquia','91':'Índia','92':'Paquistão','212':'Marrocos','213':'Argélia','234':'Nigéria','244':'Angola','254':'Quênia','258':'Moçambique','351':'Portugal','352':'Luxemburgo','353':'Irlanda','354':'Islândia','358':'Finlândia','380':'Ucrânia','503':'El Salvador','502':'Guatemala','504':'Honduras','505':'Nicarágua','506':'Costa Rica','507':'Panamá','591':'Bolívia','592':'Guiana','593':'Equador','595':'Paraguai','597':'Suriname','598':'Uruguai','971':'Emirados Árabes','972':'Israel','966':'Arábia Saudita'};
+function ccName(d){for(var n=3;n>=1;n--){var k=d.slice(0,n);if(CCT[k])return{cc:k,nome:CCT[k]}}return null}
+function phoneExtras(p,d){
+  var rows=[];
+  if(p.br){
+    var obs=[];
+    if(/^(\d)\1+$/.test(p.num))obs.push('Todos os dígitos iguais, número provavelmente fictício');
+    if('0123456789'.indexOf(p.num)>-1||'9876543210'.indexOf(p.num)>-1)obs.push('Sequência numérica, número provavelmente fictício');
+    if(p.num.length===8&&/^[6-9]/.test(p.num))obs.push('Possível celular no formato antigo, sem o 9 inicial. Versão atual: ('+p.ddd+') 9'+p.num.slice(0,4)+'-'+p.num.slice(4));
+    if(p.num.length===9&&p.num[0]!=='9')obs.push('Com 9 dígitos, celulares começam com 9');
+    if(!p.dddOk&&/^[3589]00/.test(p.ddd+p.num))obs.push('Parece número de serviço (0800, 0300, 0500 ou 0900), que não tem DDD de região');
+    var tz=UFTZ[p.uf]||['America/Sao_Paulo','UTC-3'],hora='';
+    try{hora=new Date().toLocaleString('pt-BR',{timeZone:tz[0],weekday:'short',hour:'2-digit',minute:'2-digit'})+' ('+tz[1]+')'}catch(e){}
+    rows.push(['Região do DDD',p.dddOk?(DDDR[+p.ddd]||''):''],['Estado',p.uf?UFN[p.uf]+' ('+p.uf+')':''],['Hora local agora',p.dddOk?hora:''],['Formato nacional','('+p.ddd+') '+p.local],['Formato E.164','+55'+p.ddd+p.num],['Observações',obs]);
+  }else{
+    var c=ccName(d);
+    rows.push(['País (provável, pelo código)',c?c.nome.replace(/\s*\(\+\d+\)$/,'')+' (+'+c.cc+')':''],['Formato E.164','+'+d]);
+  }
+  return rows;
+}
+var FREEMAIL=['gmail.com','googlemail.com','outlook.com','hotmail.com','live.com','msn.com','yahoo.com','yahoo.com.br','ymail.com','icloud.com','me.com','mac.com','proton.me','protonmail.com','pm.me','uol.com.br','bol.com.br','terra.com.br','ig.com.br','globo.com','globomail.com','zoho.com','aol.com','gmx.com','gmx.net','mail.com','yandex.com','yandex.ru','tutanota.com','tuta.io','outlook.com.br','hotmail.com.br','live.com.br'];
+var ROLEMAIL=['admin','administrador','contato','contact','info','suporte','support','vendas','sales','financeiro','rh','noreply','no-reply','naoresponda','atendimento','comercial','webmaster','postmaster','abuse','sac','ouvidoria','marketing','compras','cobranca','faturamento','juridico','diretoria','recepcao','secretaria'];
+var TYPOS={'gmial.com':'gmail.com','gmai.com':'gmail.com','gmal.com':'gmail.com','gamil.com':'gmail.com','gnail.com':'gmail.com','gmaill.com':'gmail.com','gmail.con':'gmail.com','gmail.co':'gmail.com','gmail.com.br':'gmail.com','hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotnail.com':'hotmail.com','hotmail.con':'hotmail.com','hotmail.com.com':'hotmail.com','outlok.com':'outlook.com','outloo.com':'outlook.com','outlook.con':'outlook.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','yahoo.con':'yahoo.com','yahoo.com.bt':'yahoo.com.br','icloud.con':'icloud.com','iclod.com':'icloud.com'};
+function mailProvider(dom,mx){
+  var m=(mx||[]).join(' ').toLowerCase(),map=[['google.com','Google (Gmail / Google Workspace)'],['googlemail.com','Google (Gmail / Google Workspace)'],['outlook.com','Microsoft (Outlook / Microsoft 365)'],['protection.outlook','Microsoft 365'],['yahoodns','Yahoo'],['icloud.com','Apple iCloud'],['protonmail','Proton Mail'],['zoho','Zoho Mail'],['yandex','Yandex'],['uol.com.br','UOL'],['terra.com','Terra'],['locaweb','Locaweb'],['umbler','Umbler'],['hostgator','HostGator'],['kinghost','KingHost'],['secureserver.net','GoDaddy'],['titan.email','Titan (Hostinger)'],['hostinger','Hostinger'],['mimecast','Mimecast (filtro corporativo)'],['pphosted','Proofpoint (filtro corporativo)'],['registro.br','Registro.br'],['mailgun','Mailgun'],['sendgrid','SendGrid'],['improvmx','ImprovMX (encaminhamento)'],['forwardemail','Forward Email (encaminhamento)']];
+  for(var i=0;i<map.length;i++){if(m.indexOf(map[i][0])>-1)return map[i][1]}
+  return '';
+}
+function emailInfo(em,mx,spf,dmarc,mtasts,bimi){
+  var p=em.split('@'),loc=p[0],dom=p[1],o=[];
+  var base=loc.split('+')[0],tag=loc.indexOf('+')>-1?loc.slice(loc.indexOf('+')+1):'';
+  var free=FREEMAIL.indexOf(dom)>-1,prov=mailProvider(dom,mx);
+  if(!prov&&free)prov=dom;
+  var obs=[];
+  if(tag)obs.push('Usa sufixo com + ("'+tag+'"), endereço-base: '+base+'@'+dom);
+  if(ROLEMAIL.indexOf(base.toLowerCase())>-1)obs.push('Caixa funcional ou de setor, não é de uma pessoa específica');
+  else if(/^[a-z]{2,}[._-][a-z]{2,}$/i.test(base))obs.push('Parece nome e sobrenome ('+base.replace(/[._-]/,' ')+')');
+  if(/\d{4}$/.test(base)&&/(19[4-9]\d|20[0-2]\d)$/.test(base))obs.push('Termina com um número parecido com ano ('+base.slice(-4)+')');
+  else if(/\d{3,}$/.test(base))obs.push('Termina com sequência de números');
+  if((dom==='gmail.com'||dom==='googlemail.com')&&base.indexOf('.')>-1)obs.push('O Gmail ignora pontos: '+base.replace(/\./g,'')+'@gmail.com é o mesmo endereço');
+  var typo=TYPOS[dom]||'';
+  if(typo)obs.unshift('O domínio parece erro de digitação de '+typo+', então este endereço provavelmente não existe');
+  var canon='';if(dom==='gmail.com'||dom==='googlemail.com'){canon=base.replace(/\./g,'')+'@gmail.com';if(canon===em)canon=''}
+  var spfS='';if(spf&&spf.length){var s=spf[0];spfS=/\-all\b/.test(s)?'Rígida (-all)':/~all\b/.test(s)?'Moderada (~all)':/\+all\b/.test(s)?'Aberta (+all), qualquer servidor pode enviar':/\?all\b/.test(s)?'Neutra (?all)':'Sem regra final'}
+  var dmS='',spoof='';
+  if(dmarc&&dmarc.length){var pm=(dmarc[0].match(/\bp=(\w+)/i)||[])[1];dmS=pm?'Política '+pm.toLowerCase()+(/\brua=/i.test(dmarc[0])?', com relatórios':''):'Presente';spoof=pm&&/^(quarantine|reject)$/i.test(pm)?'Protegido (DMARC em '+pm.toLowerCase()+')':'Maior risco: DMARC sem bloqueio (p=none)'}
+  else spoof='Maior risco: domínio sem DMARC';
+  return{tipo:free?'Gratuito (provedor público)':'Corporativo / domínio próprio',free:free,typo:typo,canon:canon,provedor:prov,obs:obs,base:base,spf:spfS,dmarc:dmS,spoof:spoof,mtasts:mtasts&&mtasts.length?'Presente':'',bimi:bimi&&bimi.length?'Presente (logo de marca em e-mails)':''};
+}
+
+
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function fetchJSON(url,opts,ms){
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},ms||7000);
+  opts=opts||{};opts.signal=c.signal;
+  var toErr=function(e){return (e&&e.name==='AbortError')?new Error('tempo esgotado'):e};
+  return fetch(url,opts).then(function(r){
+    if(r.status===404){clearTimeout(t);throw new Error('404')}
+    if(!r.ok){clearTimeout(t);throw new Error('HTTP '+r.status)}
+    return r.json().then(function(v){clearTimeout(t);return v},function(e){clearTimeout(t);throw toErr(e)});
+  },function(e){clearTimeout(t);throw toErr(e)});
+}
+/* tenta cada fonte em ordem; 404 (não existe) encerra a busca */
+function anyOk(fns){return new Promise(function(res,rej){var n=fns.length,last;fns.forEach(function(f){f().then(res,function(e){last=e;if(--n===0)rej(last)})})})}
+function cap(p,ms){return Promise.race([Promise.resolve(p).catch(function(){}),new Promise(function(r){setTimeout(r,ms)})])}
+function firstOk(fns){
+  var i=0,last=new Error('sem fonte');
+  function next(){
+    if(i>=fns.length)return Promise.reject(last);
+    return fns[i++]().catch(function(e){last=e;if(e&&e.message==='404')throw e;return next()});
+  }
+  return next();
+}
+var DNST={A:1,AAAA:28,MX:15,NS:2,TXT:16,PTR:12,SOA:6,CAA:257};
+function txt(s){return String(s).replace(/"\s+"/g,'').replace(/^"|"$/g,'')}
+function dns(name,type){
+  var q='name='+encodeURIComponent(name)+'&type='+type,h={headers:{Accept:'application/dns-json'}};
+  return anyOk([
+    function(){return fetchJSON('https://cloudflare-dns.com/dns-query?'+q,h,3500)},
+    function(){return fetchJSON('https://dns.google/resolve?'+q,h,3500)}
+  ]).then(function(d){return (d.Answer||[]).filter(function(a){return a.type===DNST[type]}).map(function(a){return a.type===16?txt(a.data):String(a.data)})});
+}
+function dmarcFind(d){
+  var labs=String(d).split('.'),i=0;
+  function next(){
+    if(labs.length-i<2)return Promise.resolve([]);
+    var name='_dmarc.'+labs.slice(i).join('.');i++;
+    return dns(name,'TXT').then(function(r){return r.some(function(x){return /^v=DMARC1/i.test(x)})?r:next()});
+  }
+  return next();
+}
+function rdapGet(kind,v){
+  var p=kind+'/'+encodeURIComponent(v),f=[];
+  if(kind==='domain'&&/\.br$/.test(v))f.push(function(){return fetchJSON('https://rdap.registro.br/'+p)});
+  var tl=(v.match(/\.(com|net)$/)||[])[1];
+  if(kind==='domain'&&tl)f.push(function(){return fetchJSON('https://rdap.verisign.com/'+tl+'/v1/'+p,null,5000)});
+  f.push(function(){return fetchJSON('https://rdap.org/'+p,null,6000)});
+  return firstOk(f);
+}
+function fmtDate(s){var m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[3]+'/'+m[2]+'/'+m[1];var d=new Date(s);return isNaN(d)?s:d.toLocaleDateString('pt-BR')}
+function age(s){var d=new Date(s);if(isNaN(d))return '';var y=(Date.now()-d)/31557600000;return y>=1?Math.floor(y)+' ano(s)':Math.max(1,Math.floor(y*12))+' mês(es)'}
+
+var grid=$('grid'),report={},current=null,tok=0;
+function card(title,icon){
+  var c=el('div','card'),h=el('h3'),i=el('i','fa-solid '+icon),st=0;
+  i.setAttribute('aria-hidden','true');h.appendChild(i);h.appendChild(el('span',null,title));c.appendChild(h);
+  var body=el('div');c.appendChild(body);grid.appendChild(c);c.style.animationDelay=Math.min(grid.children.length*70,560)+'ms';
+  setTimeout(function(){if(st){st=0;body.textContent='';body.appendChild(el('p','note','Esta fonte demorou demais para responder. Tente pesquisar novamente.'))}},25000);
+  return{
+    loading:function(){st=1;body.textContent='';var l=el('div','loading');l.appendChild(el('span','spin'));l.appendChild(el('span',null,'Consultando…'));body.appendChild(l);var sk=el('div');['92%','68%','80%'].forEach(function(w){var b=el('div','skel');b.style.width=w;sk.appendChild(b)});body.appendChild(sk)},
+    rows:function(arr){
+      st=0;body.textContent='';var dl=el('dl'),n=0;
+      arr.forEach(function(r){if(r[1]==null||r[1]===''||(Array.isArray(r[1])&&!r[1].length))return;n++;
+        dl.appendChild(el('dt',null,r[0]));var dd=el('dd');
+        if(Array.isArray(r[1]))r[1].forEach(function(v){dd.appendChild(el('span','tag',v))});else dd.textContent=r[1];
+        dl.appendChild(dd)});
+      body.appendChild(n?dl:el('p','note','Nenhum dado público encontrado.'));
+    },
+    clear:function(){st=0;body.textContent=''},
+    error:function(m){st=0;body.textContent='';body.appendChild(el('p','note',m||'Não foi possível obter esta informação agora. Tente novamente.'))},
+    note:function(t){body.appendChild(el('p','note',t))},
+    add:function(n){body.appendChild(n)},
+    links:function(arr){
+      st=0;body.textContent='';var w=el('div','links');
+      arr.forEach(function(l){var a=el('a');a.href=l[1];a.target='_blank';a.rel='noopener noreferrer';
+        var ic=el('i',l[2]);ic.setAttribute('aria-hidden','true');a.appendChild(ic);a.appendChild(el('span',null,l[0]));w.appendChild(a)});
+      body.appendChild(w);
+    }
+  };
+}
+
+var ROLEPT={registrant:'Titular (registrante)',administrative:'Contato administrativo',technical:'Contato técnico',abuse:'Contato de abuso',billing:'Contato de cobrança',reseller:'Revendedor',sponsor:'Patrocinador',proxy:'Procurador',notifications:'Notificações'};
+function vcardGet(e){
+  var o={nome:'',org:'',email:[],tel:[],end:''};
+  ((e.vcardArray&&e.vcardArray[1])||[]).forEach(function(p){
+    var k=p[0],v=p[3];
+    if(k==='fn')o.nome=v||'';
+    else if(k==='org')o.org=Array.isArray(v)?v.join(' '):(v||'');
+    else if(k==='email'&&v)o.email.push(v);
+    else if(k==='tel'&&v)o.tel.push(String(v).replace(/^tel:/,''));
+    else if(k==='adr'){var lab=p[1]&&p[1].label;o.end=lab?String(lab).replace(/\n/g,', '):(Array.isArray(v)?v.filter(Boolean).join(', '):'')}
+  });
+  return o;
+}
+/* titular e contatos que o registro RDAP publica (muitos TLDs ocultam por privacidade) */
+function rdapHolders(j){
+  var rows=[],list=[],cnpj='',iana='',hasReg=false;
+  function walk(es){(es||[]).forEach(function(e){
+    var roles=e.roles||[];
+    if(roles.indexOf('registrar')>-1){(e.publicIds||[]).forEach(function(x){if(/iana/i.test(x.type||''))iana=x.identifier})}
+    var rs=roles.filter(function(r){return r!=='registrar'});
+    if(rs.length){
+      var v=vcardGet(e),ids=(e.publicIds||[]).map(function(x){return String(x.type||'ID').toUpperCase()+': '+x.identifier});
+      var parts=[v.nome,v.org&&v.org!==v.nome?v.org:''].concat(ids,v.email,v.tel,[v.end]).filter(Boolean);
+      if(rs.indexOf('registrant')>-1){hasReg=true;(e.publicIds||[]).forEach(function(x){var dg=String(x.identifier||'').replace(/\D/g,'');if(dg.length===14)cnpj=dg})}
+      var lab=rs.map(function(r){return ROLEPT[r]||r}).join(' / ');
+      if(rs.some(function(r){return r!=='abuse'}))rows.push([lab,parts.length?parts:'']);
+      list.push({papel:rs,nome:v.nome,organizacao:v.org,documentos:ids,emails:v.email,telefones:v.tel,endereco:v.end});
+    }
+    walk(e.entities);
+  })}
+  walk(j.entities);
+  if(!hasReg)rows.unshift(['Titular (registrante)','Oculto pelo registro (proteção de privacidade, comum em .com, .net e outros)']);
+  return{rows:rows,list:list,cnpj:cnpj,iana:iana};
+}
+function cnpjCard(cnpj,rep){
+  var c=card('Empresa titular (CNPJ)','fa-building');c.loading();
+  return fetchJSON('https://brasilapi.com.br/api/cnpj/v1/'+cnpj,null,12000).then(function(j){
+    var socios=(j.qsa||[]).slice(0,15).map(function(s){return s.nome_socio+(s.qualificacao_socio?' ('+s.qualificacao_socio+')':'')});
+    var end=[j.descricao_tipo_de_logradouro,j.logradouro,j.numero,j.complemento,j.bairro,j.municipio&&j.uf?j.municipio+'/'+j.uf:'',j.cep].filter(Boolean).join(', ');
+    c.rows([['CNPJ',String(j.cnpj||cnpj).replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5')],['Razão social',j.razao_social],['Nome fantasia',j.nome_fantasia],['Situação cadastral',j.descricao_situacao_cadastral],['Abertura',j.data_inicio_atividade?fmtDate(j.data_inicio_atividade):''],['Natureza jurídica',j.natureza_juridica],['Porte',j.porte||j.descricao_porte],['Atividade principal',j.cnae_fiscal_descricao],['Capital social',j.capital_social!=null?'R$ '+Number(j.capital_social).toLocaleString('pt-BR'):''],['Endereço',end],['Telefone',j.ddd_telefone_1],['E-mail',j.email],['Sócios e administradores',socios]]);
+    c.note('Dados do cadastro público da Receita Federal via BrasilAPI. Se o titular do domínio for pessoa física, o registro não traz dados empresariais.');
+    rep.empresa={cnpj:cnpj,razaoSocial:j.razao_social,nomeFantasia:j.nome_fantasia,situacao:j.descricao_situacao_cadastral,abertura:j.data_inicio_atividade,atividade:j.cnae_fiscal_descricao,endereco:end,socios:socios};
+  }).catch(function(e){c.error(e.message==='404'?'CNPJ não encontrado na base pública.':'Não foi possível consultar o CNPJ ('+e.message+').');rep.empresa=null});
+}
+function fmtCnpj(d){return String(d).replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5')}
+function fmtTel(v){var d=String(v||'').replace(/\D/g,'');if(d.length===11)return '('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7);if(d.length===10)return '('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6);return d}
+function brl(v){var n=Number(v);return v==null||v===''||isNaN(n)?'':n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function cnpjFetch(d){return anyOk([
+  function(){return fetchJSON('https://brasilapi.com.br/api/cnpj/v1/'+d,null,12000)},
+  function(){return fetchJSON('https://minhareceita.org/'+d,null,12000)}
+])}
+function cnpjFull(d,c,rep){
+  c.loading();
+  var lk=card('Mais fontes sobre o CNPJ','fa-link'),fm=fmtCnpj(d);
+  lk.links([
+    ['Receita Federal (comprovante)','https://solucoes.receita.fazenda.gov.br/servicos/cnpjreva/cnpjreva_solicitacao.asp?cnpj='+d,'fa-solid fa-landmark'],
+    ['Portal da Transparência','https://portaldatransparencia.gov.br/busca?termo='+d,'fa-solid fa-scale-balanced'],
+    ['Consulta de sócios (cnpj.biz)','https://cnpj.biz/'+d,'fa-solid fa-building'],
+    ['Jusbrasil (processos)','https://www.jusbrasil.com.br/busca?q='+d,'fa-solid fa-gavel'],
+    ['Google (menções)','https://www.google.com/search?q=%22'+encodeURIComponent(fm)+'%22','fa-brands fa-google'],
+    ['Bing (menções)','https://www.bing.com/search?q=%22'+encodeURIComponent(fm)+'%22','fa-solid fa-magnifying-glass']
+  ]);
+  return cnpjFetch(d).then(function(j){
+    if(!j||(!j.razao_social&&!j.cnpj))throw new Error('404');
+    c.clear();
+    var end=[[j.descricao_tipo_de_logradouro,j.logradouro].filter(Boolean).join(' '),j.numero,j.complemento,j.bairro].filter(Boolean).join(', ');
+    var cid=[j.municipio&&j.uf?j.municipio+'/'+j.uf:(j.municipio||j.uf||''),j.cep?'CEP '+String(j.cep).replace(/^(\d{5})(\d{3})$/,'$1-$2'):''].filter(Boolean).join(' · ');
+    var sec=(j.cnaes_secundarios||[]).filter(function(x){return x&&(x.codigo||x.descricao)}).map(function(x){return (x.codigo||'')+' · '+(x.descricao||'')});
+    var tels=[j.ddd_telefone_1,j.ddd_telefone_2].filter(Boolean).map(fmtTel);
+    var fax=j.ddd_fax?fmtTel(j.ddd_fax):'';
+    var reg=(j.regime_tributario||[]).slice().sort(function(a,b){return b.ano-a.ano}).slice(0,6).map(function(x){return x.ano+' · '+x.forma_de_tributacao});
+    var simples=j.opcao_pelo_simples===true?'Optante'+(j.data_opcao_pelo_simples?' desde '+fmtDate(j.data_opcao_pelo_simples):'')+(j.data_exclusao_do_simples?' · excluída em '+fmtDate(j.data_exclusao_do_simples):''):(j.opcao_pelo_simples===false?'Não optante'+(j.data_exclusao_do_simples?' · excluída em '+fmtDate(j.data_exclusao_do_simples):''):'');
+    var mei=j.opcao_pelo_mei===true?'Sim'+(j.data_opcao_pelo_mei?' (desde '+fmtDate(j.data_opcao_pelo_mei)+')':''):(j.opcao_pelo_mei===false?'Não':'');
+    c.rows([
+      ['CNPJ',fmtCnpj(j.cnpj||d)],
+      ['Tipo',j.descricao_identificador_matriz_filial||(j.identificador_matriz_filial===1?'Matriz':j.identificador_matriz_filial===2?'Filial':'')],
+      ['Razão social',j.razao_social],
+      ['Nome fantasia',j.nome_fantasia],
+      ['Situação cadastral',j.descricao_situacao_cadastral],
+      ['Data da situação',j.data_situacao_cadastral?fmtDate(j.data_situacao_cadastral):''],
+      ['Motivo da situação',j.descricao_motivo_situacao_cadastral&&!/^sem motivo$/i.test(j.descricao_motivo_situacao_cadastral)?j.descricao_motivo_situacao_cadastral:''],
+      ['Situação especial',j.situacao_especial?j.situacao_especial+(j.data_situacao_especial?' ('+fmtDate(j.data_situacao_especial)+')':''):''],
+      ['Abertura',j.data_inicio_atividade?fmtDate(j.data_inicio_atividade)+' ('+age(j.data_inicio_atividade)+')':''],
+      ['Natureza jurídica',j.natureza_juridica],
+      ['Porte',j.porte||j.descricao_porte],
+      ['Capital social',brl(j.capital_social)],
+      ['Responsável (qualificação)',j.qualificacao_do_responsavel!=null&&j.qualificacao_do_responsavel!==''?String(j.qualificacao_do_responsavel):''],
+      ['Ente federativo responsável',j.ente_federativo_responsavel],
+      ['Atividade principal',j.cnae_fiscal?j.cnae_fiscal+' · '+(j.cnae_fiscal_descricao||''):(j.cnae_fiscal_descricao||'')],
+      ['Atividades secundárias ('+sec.length+')',sec],
+      ['Endereço',end],
+      ['Cidade / CEP',cid],
+      ['Telefones',tels],
+      ['Fax',fax],
+      ['E-mail',j.email?String(j.email).toLowerCase():''],
+      ['Simples Nacional',simples],
+      ['MEI',mei],
+      ['Regime tributário (Lucro)',reg]
+    ]);
+    var q=j.qsa||[];
+    if(q.length){
+      var h=el('p','note','Quadro de sócios e administradores ('+q.length+')');h.style.cssText='margin:16px 0 4px;font-weight:600;color:var(--ink)';c.add(h);
+      var bx=el('div');
+      q.slice(0,100).forEach(function(s){
+        var row=el('div');row.style.cssText='border-top:1px solid var(--line);padding:9px 0;font-size:.82rem';
+        row.appendChild(el('strong',null,s.nome_socio||'—'));
+        var inf=[s.qualificacao_socio,s.data_entrada_sociedade?'entrou em '+fmtDate(s.data_entrada_sociedade):'',s.faixa_etaria?'faixa etária '+s.faixa_etaria:'',s.pais?'país: '+s.pais:'',s.nome_representante_legal?'representante: '+s.nome_representante_legal:'' ].filter(Boolean).join(' · ');
+        if(inf){var x=el('div',null,inf);x.style.color='var(--ink-2)';row.appendChild(x)}
+        var doc=s.cnpj_cpf_do_socio;if(doc){var y=el('div',null,'Documento (mascarado pela Receita): '+doc);y.style.cssText='color:var(--ink-2);font-size:.78rem';row.appendChild(y)}
+        bx.appendChild(row);
+      });
+      c.add(bx);
+    }
+    c.note('Fonte: cadastro público da Receita Federal (BrasilAPI, com Minha Receita como reserva). A Receita mascara o CPF dos sócios pessoa física. Dados podem ter defasagem de dias em relação ao comprovante oficial.');
+    var raw=JSON.parse(JSON.stringify(j));
+    rep.cnpj={cnpj:d,formatado:fm,dados:raw};
+  }).catch(function(e){
+    rep.cnpj=null;c.clear();
+    c.note(e&&e.message==='404'?'CNPJ não encontrado na base pública da Receita.':'Não foi possível consultar o CNPJ agora ('+((e&&e.message)||'sem resposta')+'). Tente novamente ou use os links abaixo.');
+  });
+}
+function rdapDomain(d,c,rep,key){
+  c.loading();
+  return rdapGet('domain',d).then(function(j){
+    var ev={};(j.events||[]).forEach(function(e){ev[e.eventAction]=e.eventDate});
+    var reg='';(j.entities||[]).forEach(function(e){if((e.roles||[]).indexOf('registrar')>-1&&e.vcardArray){(e.vcardArray[1]||[]).forEach(function(p){if(p[0]==='fn')reg=p[3]})}});
+    var ns=(j.nameservers||[]).map(function(n){return (n.ldhName||'').toLowerCase()});
+    var hold=rdapHolders(j),dnssec=j.secureDNS?(j.secureDNS.delegationSigned?'Ativo':'Desativado'):'';
+    var extraRows=[['Transferido em',ev.transfer?fmtDate(ev.transfer):'']],lock=(j.status||[]).some(function(s){return /prohibited/i.test(s)})?'Ativas (bloqueio de transferência, alteração ou exclusão)':'';
+    c.rows([['Domínio',(j.ldhName||d).toLowerCase()],['Registrador',reg],['Criado em',ev.registration?fmtDate(ev.registration)+' ('+age(ev.registration)+')':''],['Atualizado em',ev['last changed']?fmtDate(ev['last changed']):''],['Expira em',ev.expiration?fmtDate(ev.expiration)+' ('+(function(){var n=Math.round((new Date(ev.expiration)-Date.now())/864e5);return isNaN(n)?'':n>=0?'em '+n+' dia(s)':'vencido há '+(-n)+' dia(s)'})()+')':''],['Travas de segurança',lock],['DNSSEC',dnssec]].concat(extraRows,hold.rows));
+    var lkw=el('div','links');lkw.style.marginTop='14px';
+    if(/\.br$/.test(d))lkw.appendChild(linkEl('Whois no Registro.br','https://registro.br/tecnologia/ferramentas/whois/?search='+encodeURIComponent(d),'fa-solid fa-id-card'));
+    lkw.appendChild(linkEl('RDAP completo (JSON)','https://rdap.org/domain/'+encodeURIComponent(d),'fa-solid fa-code'));
+    c.add(lkw);
+    rep[key]={criacao:ev.registration,expiracao:ev.expiration,registrador:reg,registradorIana:hold.iana||null,status:j.status,dnssec:dnssec||null,servidores:ns,contatos:hold.list};
+    if(key==='rdap'&&hold.cnpj)return cnpjCard(hold.cnpj,rep);
+  }).catch(function(e){
+    rep[key]=null;
+    c.error(e.message==='404'?'Domínio não encontrado no registro público.':'Não foi possível obter o RDAP ('+e.message+'). Este domínio pode não ter RDAP acessível pelo navegador.');
+  });
+}
+function dnsCard(d,c,rep){
+  c.loading();var types=['A','AAAA','MX','NS','TXT','CAA'];
+  return Promise.all(types.map(function(t){return dns(d,t).catch(function(){return null})}).concat([dmarcFind(d).catch(function(){return null})])).then(function(r){
+    if(r.slice(0,types.length).every(function(x){return x===null}))throw new Error('falha');
+    var o={};types.forEach(function(t,i){o[t]=r[i]||[]});rep.dns=o;
+    var NSP=[['cloudflare','Cloudflare'],['awsdns','Amazon Route 53'],['googledomains','Google Domains'],['domaincontrol','GoDaddy'],['dns.br','Registro.br'],['registrar-servers','Namecheap'],['azure-dns','Azure DNS'],['locaweb','Locaweb'],['hostgator','HostGator'],['uol','UOL Host'],['umbler','Umbler'],['hostinger','Hostinger'],['digitalocean','DigitalOcean'],['vercel-dns','Vercel'],['netlify','Netlify'],['wixdns','Wix'],['squarespace','Squarespace']];
+    var SVC=[['google-site-verification','Google (Search Console / Workspace)'],['ms=','Microsoft 365'],['facebook-domain-verification','Meta (Facebook)'],['atlassian-domain-verification','Atlassian'],['docusign','DocuSign'],['stripe-verification','Stripe'],['zoho-verification','Zoho'],['apple-domain-verification','Apple'],['amazonses','Amazon SES'],['_github-pages-challenge','GitHub Pages'],['openai-domain-verification','OpenAI'],['adobe-idp-site-verification','Adobe'],['mailchimp','Mailchimp'],['sendgrid','SendGrid'],['hubspot','HubSpot'],['shopify','Shopify'],['pinterest-site-verification','Pinterest'],['tiktok-domain-verification','TikTok'],['mandrill','Mandrill (Mailchimp)'],['mailgun','Mailgun'],['brevo','Brevo'],['sendinblue','Brevo (Sendinblue)']];
+    var nsj=(o.NS||[]).join(' ').toLowerCase(),txj=(o.TXT||[]).join(' ').toLowerCase(),dnsp=[],svc=[];
+    NSP.forEach(function(x){if(nsj.indexOf(x[0])>-1&&dnsp.indexOf(x[1])<0)dnsp.push(x[1])});
+    SVC.forEach(function(x){if(txj.indexOf(x[0])>-1&&svc.indexOf(x[1])<0)svc.push(x[1])});
+    rep.dns.provedorDns=dnsp;rep.dns.servicosDetectados=svc;
+    var spfD=(o.TXT||[]).filter(function(x){return /^v=spf1/i.test(x)}),dmD=(r[types.length]||[]).filter(function(x){return /^v=DMARC1/i.test(x)}),eiD=(o.MX||[]).length?emailInfo('x@'+d,o.MX,spfD,dmD,[],[]):null;rep.dns.protecaoEmail=eiD?{spf:eiD.spf||null,dmarc:eiD.dmarc||null,falsificavel:eiD.spoof}:null;
+    c.rows(types.map(function(t,i){return [t,r[i]||[]]}).concat([['Provedor de DNS',dnsp],['Serviços detectados (pelos TXT)',svc],['Rigor do SPF',eiD&&eiD.spf],['Política DMARC (resumo)',eiD&&eiD.dmarc],['Falsificação de e-mail (spoofing)',eiD&&eiD.spoof]]));
+    if(types.every(function(t){return !o[t].length}))c.note('Nenhum registro encontrado. O domínio pode não existir.');
+  }).catch(function(){c.error('Falha ao consultar o DNS. Verifique a conexão e tente novamente.')});
+}
+function geoLookup(ip){
+  return anyOk([
+    function(){return fetchJSON('https://ipwho.is/'+encodeURIComponent(ip)).then(function(j){
+      if(j.success===false)throw new Error(j.message||'falha');var k=j.connection||{};
+      return{pais:j.country,regiao:j.region,cidade:j.city,isp:k.isp,org:k.org,asn:k.asn?'AS'+k.asn:'',dominio:k.domain,fuso:j.timezone&&j.timezone.id,coord:j.latitude!=null?j.latitude+', '+j.longitude:''};
+    })},
+    function(){return fetchJSON('https://ipapi.co/'+encodeURIComponent(ip)+'/json/').then(function(j){
+      if(j.error)throw new Error(j.reason||'falha');
+      return{pais:j.country_name,regiao:j.region,cidade:j.city,isp:'',org:j.org,asn:j.asn,dominio:'',fuso:j.timezone,coord:j.latitude!=null?j.latitude+', '+j.longitude:''};
+    })}
+  ]);
+}
+function distKm(a,b){var R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)*Math.sin(dn/2);return Math.round(2*R*Math.asin(Math.sqrt(x)))}
+function nm(v){v=parseFloat(v);return isNaN(v)?null:v}
+/* consulta 4 fontes públicas em paralelo; cada uma que falhar é ignorada */
+function geoMulti(ip){
+  var e=encodeURIComponent(ip),nul=function(){return null};
+  var a=fetchJSON('https://ipwho.is/'+e).then(function(j){
+    if(!j||j.success===false)throw new Error('falha');var k=j.connection||{},t=j.timezone||{};
+    return{fonte:'ipwho.is',pais:j.country,codigo:j.country_code,continente:j.continent,regiao:j.region,cidade:j.city,cep:j.postal,lat:nm(j.latitude),lon:nm(j.longitude),isp:k.isp,org:k.org,asn:k.asn?'AS'+k.asn:'',dominio:k.domain,fuso:t.id,ddi:j.calling_code,bandeira:j.flag&&j.flag.emoji,versao:j.type};
+  }).catch(nul);
+  var b=fetchJSON('https://api.ipapi.is/?q='+e).then(function(j){
+    if(!j||j.error||!j.ip)throw new Error('falha');var l=j.location||{},co=j.company||{},as=j.asn||{};
+    return{fonte:'ipapi.is',pais:l.country,codigo:l.country_code,continente:l.continent,regiao:l.state,cidade:l.city,cep:l.zip,lat:nm(l.latitude),lon:nm(l.longitude),isp:co.name,org:as.org,asn:as.asn?'AS'+as.asn:'',dominio:co.domain||as.domain,fuso:l.timezone,ddi:l.calling_code,moeda:l.currency_code,tipoRede:co.type||as.type,
+      seg:{vpn:!!j.is_vpn,proxy:!!j.is_proxy,tor:!!j.is_tor,datacenter:!!j.is_datacenter,movel:!!j.is_mobile,abusador:!!j.is_abuser,crawler:!!j.is_crawler,bogon:!!j.is_bogon},abuso:j.abuse||null};
+  }).catch(nul);
+  var c=fetchJSON('https://ipapi.co/'+e+'/json/').then(function(j){
+    if(!j||j.error)throw new Error('falha');
+    return{fonte:'ipapi.co',pais:j.country_name,codigo:j.country_code,continente:j.continent_code,regiao:j.region,cidade:j.city,cep:j.postal,lat:nm(j.latitude),lon:nm(j.longitude),org:j.org,asn:j.asn,fuso:j.timezone,ddi:(j.country_calling_code||'').replace('+',''),moeda:j.currency_name,idiomas:j.languages};
+  }).catch(nul);
+  var d=fetchJSON('https://ipinfo.io/'+e+'/json').then(function(j){
+    if(!j||!j.ip)throw new Error('falha');var ll=String(j.loc||'').split(','),om=String(j.org||'').match(/^(AS\d+)\s*(.*)$/);
+    return{fonte:'ipinfo.io',codigo:j.country,regiao:j.region,cidade:j.city,cep:j.postal,lat:nm(ll[0]),lon:nm(ll[1]),org:om?om[2]:j.org,asn:om?om[1]:'',fuso:j.timezone,hostname:j.hostname};
+  }).catch(nul);
+  var cln=function(v){return v==null||v==='nil'?'':v},asn=function(v){v=String(v||'');return v&&v!=='0'?(/^AS/i.test(v)?v:'AS'+v):''};
+  var f1=fetchJSON('https://get.geojs.io/v1/ip/geo/'+e+'.json').then(function(j){
+    if(!j||!j.country_code)throw new Error('falha');
+    return{fonte:'geojs.io',pais:cln(j.country),codigo:cln(j.country_code),continente:cln(j.continent_code),regiao:cln(j.region),cidade:cln(j.city),lat:nm(j.latitude),lon:nm(j.longitude),org:cln(j.organization_name||j.organization),asn:asn(j.asn),fuso:cln(j.timezone)};
+  }).catch(nul);
+  var f2=fetchJSON('https://free.freeipapi.com/api/json/'+e).then(function(j){
+    if(!j||!j.countryCode)throw new Error('falha');
+    return{fonte:'freeipapi.com',pais:j.countryName,codigo:j.countryCode,continente:j.continent,regiao:j.regionName,cidade:j.cityName,cep:j.zipCode,lat:nm(j.latitude),lon:nm(j.longitude),org:j.asnOrganization,asn:asn(j.asn),fuso:j.timeZone};
+  }).catch(nul);
+  var f3=workerIp(ip).then(function(j){return j&&j.geo?Object.assign({fonte:'ip-api.com'},j.geo):null}).catch(nul);
+  /* o Worker só entra como reserva: não atrasa o card quando as fontes do navegador respondem */
+  return new Promise(function(resolve){
+    var ps=[a,b,c,d,f1,f2],got=[],left=ps.length,timer=null,done=false;
+    function fin(){if(done)return;done=true;clearTimeout(timer);if(got.length)return resolve(got);f3.then(function(x){resolve(x?[x]:[])},function(){resolve([])})}
+    ps.forEach(function(p){p.then(function(v){if(v)got.push(v);if(got.length>=2&&!timer)timer=setTimeout(fin,2500);if(--left===0)fin()},function(){if(--left===0)fin()})});
+  });
+}
+function ipCard(ip,c,rep){
+  if(isPrivate(ip)){c.error('Endereço privado ou reservado. Ele não existe na internet pública e não pode ser consultado.');rep.ip=null;return Promise.resolve()}
+  c.loading();
+  return Promise.all([geoMulti(ip).catch(function(){return []}),Promise.race([rdapGet('ip',ip).catch(function(){return null}),new Promise(function(r){setTimeout(function(){r(null)},3000)})])]).then(function(r){
+    var fs=r[0],n=r[1];
+    if(!fs.length&&!n)throw new Error('as fontes não responderam');
+    var pick=function(k){for(var i=0;i<fs.length;i++){if(fs[i][k]!=null&&fs[i][k]!=='')return fs[i][k]}return ''};
+    var pais=pick('pais'),cod=pick('codigo'),band=pick('bandeira'),fuso=pick('fuso'),hora='';
+    if(fuso){try{hora=' · agora '+new Date().toLocaleString('pt-BR',{timeZone:fuso,day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(x){}}
+    var lat=null,lon=null;for(var i=0;i<fs.length;i++){if(fs[i].lat!=null&&fs[i].lon!=null){lat=fs[i].lat;lon=fs[i].lon;break}}
+    var sb=null;fs.forEach(function(f){if(f.seg)sb=f});
+    var tags=[];
+    if(sb){var S=sb.seg;if(S.vpn)tags.push('VPN');if(S.proxy)tags.push('Proxy');if(S.tor)tags.push('Tor');if(S.datacenter)tags.push('Datacenter / hospedagem');if(S.movel)tags.push('Rede móvel');if(S.abusador)tags.push('Abusador conhecido');if(S.crawler)tags.push('Crawler / robô');if(S.bogon)tags.push('Endereço reservado (bogon)');if(!tags.length)tags.push('Sem sinal de VPN, proxy ou Tor')}
+    var ab=sb&&sb.abuso?[sb.abuso.name,sb.abuso.email,sb.abuso.phone].filter(Boolean).join(' · '):'';
+    var rows=[['IP',ip],['País',pais?((band?band+' ':'')+pais+(cod?' ('+cod+')':'')):cod],['Estado / região',pick('regiao')],['Cidade',pick('cidade')],['CEP (aproximado)',pick('cep')],['Coordenadas',lat!=null?lat+', '+lon:''],['Fuso horário',fuso?fuso+hora:''],['Provedor',pick('isp')],['Organização',pick('org')],['ASN',pick('asn')],['Tipo de rede',pick('tipoRede')],['Domínio',pick('dominio')],['Hostname',pick('hostname')],['Conexão',sb?tags:'Não verificado'],['Contato de abuso',ab]];
+    if(n)rows.push(['Rede (RDAP)',n.name],['Bloco',n.startAddress&&n.endAddress?n.startAddress+' – '+n.endAddress:''],['País do bloco',n.country]);
+    var cmp=fs.filter(function(f){return f.cidade||f.lat!=null}).map(function(f){return[f.fonte,[f.cidade,f.regiao,f.pais||f.codigo].filter(Boolean).join(', ')+(f.lat!=null?' · '+f.lat+', '+f.lon:'')]});
+    var pts=fs.filter(function(f){return f.lat!=null&&f.lon!=null}),dv='';
+    if(pts.length>1){var mx=0;pts.forEach(function(p){mx=Math.max(mx,distKm([pts[0].lat,pts[0].lon],[p.lat,p.lon]))});dv=mx<=15?'Fontes concordam (até '+mx+' km)':'As fontes divergem em até '+mx+' km'+(mx>100?', trate como referência regional':'')}
+    rows=rows.concat(cmp.length>1&&/diverg/.test(dv)?cmp.map(function(x){return['Fonte: '+x[0],x[1]]}):[]);rows.push(['Concordância entre fontes',dv]);
+    rows.splice(1,0,['Resumo',[pais,pick('cidade'),pick('isp')||pick('org')].filter(Boolean).concat(sb?tags.filter(function(t){return !/^Sem sinal/.test(t)}):[]).join(' · ')]);
+    c.rows(rows);
+    var lk=el('div','links');lk.style.marginTop='14px';
+    if(lat!=null){lk.appendChild(linkEl('Abrir no OpenStreetMap','https://www.openstreetmap.org/?mlat='+lat+'&mlon='+lon+'#map=11/'+lat+'/'+lon,'fa-solid fa-map-location-dot'));lk.appendChild(linkEl('Abrir no Google Maps','https://www.google.com/maps?q='+lat+','+lon,'fa-solid fa-location-dot'))}
+    lk.appendChild(linkEl('AbuseIPDB','https://www.abuseipdb.com/check/'+encodeURIComponent(ip),'fa-solid fa-shield-halved'));
+    lk.appendChild(linkEl('BGP (bgp.he.net)','https://bgp.he.net/ip/'+encodeURIComponent(ip),'fa-solid fa-network-wired'));
+    c.add(lk);
+    if(!fs.length)c.note('As fontes de geolocalização não responderam agora. Os dados de rede acima vêm do RDAP.');
+    else c.note('A localização de IP é aproximada e costuma indicar a cidade ou a sede do provedor, nunca o endereço de quem usa a conexão. Fontes: '+fs.map(function(f){return f.fonte}).join(', ')+'.');
+    var g=fs.length?{pais:pais,regiao:pick('regiao'),cidade:pick('cidade'),isp:pick('isp'),org:pick('org'),asn:pick('asn'),dominio:pick('dominio'),fuso:fuso,coord:lat!=null?lat+', '+lon:''}:null;
+    rep.ip={geo:g,fontes:fs,seguranca:sb?sb.seg:null,abuso:sb?sb.abuso:null,rede:n&&{nome:n.name,handle:n.handle,inicio:n.startAddress,fim:n.endAddress,pais:n.country}};
+  }).catch(function(e){c.error('Não foi possível consultar o IP: '+e.message);rep.ip=null});
+}
+function emailCard(em,c,rep){
+  c.loading();var dom=em.split('@')[1];
+  var nul=function(){return null};
+  var isSpf=function(x){return /^v=spf1/i.test(x)};
+  return Promise.all([dns(dom,'MX').catch(nul),dns(dom,'TXT').catch(nul),dmarcFind(dom).catch(nul),dns('_mta-sts.'+dom,'TXT').catch(nul),dns('default._bimi.'+dom,'TXT').catch(nul)]).then(function(r){
+    if(r[0]===null&&r[1]===null)throw new Error('falha');
+    var spf=(r[1]||[]).filter(isSpf),rd=(spf[0]||'').match(/\bredirect=([^\s]+)/i);
+    /* SPF com redirect= (ex.: Gmail): a regra final está no domínio indicado */
+    var pre=rd?dns(rd[1],'TXT').catch(nul):Promise.resolve(null);
+    return pre.then(function(rt){
+      var spfEf=rt?rt.filter(isSpf):[],spfUse=spfEf.length?spfEf:spf;
+      var mx=r[0]||[],dm=(r[2]||[]).filter(function(x){return /^v=DMARC1/i.test(x)});
+      var disp=DISPOSABLE.indexOf(dom)>-1;
+      var ei=emailInfo(em,mx,spfUse,dm,(r[3]||[]).filter(function(x){return /^v=STSv1/i.test(x)}),(r[4]||[]).filter(function(x){return /^v=BIMI1/i.test(x)}));
+      var rows=[['E-mail',em],['Domínio',dom],['Tipo',ei.tipo],['Provedor identificado',ei.provedor],['Recebe e-mails',(!ei.free||!mx.length)?(mx.length?'Sim, '+mx.length+' servidor(es) MX':'Nenhum MX encontrado'):''],['Possível erro de digitação',ei.typo?'Você quis dizer @'+ei.typo+'?':''],['Forma canônica (o Gmail ignora pontos e sufixo +)',ei.canon]];
+      if(!ei.free)rows.push(['Servidores MX',mx],['Política SPF',spf],['SPF final (via redirect)',spfEf],['Rigor do SPF',ei.spf],['Política DMARC',dm],['Política DMARC (resumo)',ei.dmarc],['Falsificação (spoofing)',mx.length?ei.spoof:''],['MTA-STS',ei.mtasts],['BIMI',ei.bimi]);
+      if(disp)rows.push(['Descartável','Sim, domínio de e-mail temporário']);
+      rows.push(['Sobre o endereço',ei.obs]);
+      c.rows(rows);
+      var cl=[['Copiar e-mail',em]];if(ei.canon)cl.push(['Copiar forma canônica',ei.canon]);
+      c.add(copyBtns(cl));
+      var lk=el('div','links');lk.style.marginTop='10px';
+      var qs=[em].concat(ei.canon?[ei.canon]:[]).map(function(v){return '"'+v+'"'}).join(' OR '),qe=encodeURIComponent(qs);
+      [['Google','https://www.google.com/search?q='+qe,'fa-brands fa-google'],['Bing','https://www.bing.com/search?q='+qe,'fa-solid fa-magnifying-glass'],['DuckDuckGo','https://duckduckgo.com/?q='+qe,'fa-solid fa-magnifying-glass']].forEach(function(l){lk.appendChild(linkEl(l[0],l[1],l[2]))});
+      if(ei.typo)lk.appendChild(linkEl('Pesquisar '+em.split('@')[0]+'@'+ei.typo,location.pathname+'?q='+encodeURIComponent(em.split('@')[0]+'@'+ei.typo),'fa-solid fa-spell-check'));
+      c.add(lk);
+      if(!mx.length)c.note('Sem registro MX, este domínio provavelmente não recebe e-mails. Se há A/AAAA, alguns servidores ainda tentam entregar.');
+      else c.note('Não é possível confirmar se a caixa postal específica existe sem enviar uma mensagem.');
+      rep.email={formato:'valido',dominio:dom,mx:mx,spf:spf,spfFinal:spfEf,dmarc:dm,descartavel:disp,tipo:ei.tipo,provedor:ei.provedor||null,rigorSpf:ei.spf||null,falsificavel:ei.spoof,mtaSts:!!ei.mtasts,bimi:!!ei.bimi,observacoes:ei.obs,erroDigitacao:ei.typo||null,formaCanonica:ei.canon||null};
+    });
+  }).catch(function(){c.error('Falha ao consultar os servidores do domínio.')});
+}
+function phoneCard(d,c,rep){
+  var p0=phoneInfo(d);
+  phoneRender(d,c,rep,{txt:'Consultando…',data:null},null);
+  var dd=p0.br&&p0.dddOk?dddLookup(p0.ddd):Promise.resolve(null);
+  return Promise.all([carrierLookup(d),dd]).then(function(r){phoneRender(d,c,rep,r[0],r[1])}).catch(function(){c.error('Falha inesperada ao analisar o telefone.')});
+}
+var UFREG={AC:'Norte',AP:'Norte',AM:'Norte',PA:'Norte',RO:'Norte',RR:'Norte',TO:'Norte',AL:'Nordeste',BA:'Nordeste',CE:'Nordeste',MA:'Nordeste',PB:'Nordeste',PE:'Nordeste',PI:'Nordeste',RN:'Nordeste',SE:'Nordeste',DF:'Centro-Oeste',GO:'Centro-Oeste',MT:'Centro-Oeste',MS:'Centro-Oeste',ES:'Sudeste',MG:'Sudeste',RJ:'Sudeste',SP:'Sudeste',PR:'Sul',RS:'Sul',SC:'Sul'};
+function titleCase(t){var lw={de:1,da:1,do:1,das:1,dos:1,e:1};return String(t).toLowerCase().split(' ').map(function(w,i){return i&&lw[w]?w:w.charAt(0).toUpperCase()+w.slice(1)}).join(' ')}
+var dddCache={};
+/* cidades atendidas pelo DDD (BrasilAPI) */
+function dddLookup(ddd){
+  if(!dddCache[ddd])dddCache[ddd]=fetchJSON('https://brasilapi.com.br/api/ddd/v1/'+ddd,null,8000).then(function(j){return j&&j.cities&&j.cities.length?{uf:j.state,cidades:j.cities.map(titleCase).sort(function(a,b){return a.localeCompare(b,'pt-BR')})}:null}).catch(function(){return null});
+  return dddCache[ddd];
+}
+/* informações extras que saem só da estrutura do número (plano de numeração) */
+function phoneDeep(p,d){
+  var r=[];
+  if(p.br){
+    var num=p.num,pre=num.length===9?num.slice(0,5):num.slice(0,4),suf=num.slice(-4),all=p.ddd+num,sv='';
+    if(p.dddOk)r.push(['Estrutura do número','+55 (país) · '+p.ddd+' (DDD) · '+pre+' (prefixo) · '+suf+' (final)']);
+    if(p.uf&&UFREG[p.uf])r.push(['Região do país',UFREG[p.uf]]);
+    if(num.length===9&&num.charAt(0)==='9')r.push(['Formato antigo (sem o 9)','('+p.ddd+') '+num.slice(1,5)+'-'+num.slice(5)]);
+    if(!p.dddOk){
+      var h=all.slice(0,3);
+      sv=h==='800'?'0800: ligação gratuita para quem liga (serviço de atendimento)':h==='300'?'0300: cobrada como ligação local para quem liga, sem região definida':h==='303'?'0303: prefixo de telemarketing ativo (ligação comercial)':h==='500'?'0500: numeração não geográfica de serviço (custo compartilhado)':h==='900'?'0900: serviço de tarifa premium, cobrado de quem liga':'';
+    }else if(num.length===8&&/^(3003|4003|4004)/.test(num))sv='Numeração não geográfica (3003, 4003, 4004): costuma ser central de atendimento de empresa ou banco, cobrada como ligação local e sem cidade de origem';
+    if(sv){if(!p.dddOk)r.push(['Estrutura do número','0'+all.slice(0,3)+' (prefixo de serviço) · '+all.slice(3)]);r.push(['Serviço identificado pela numeração',sv])}
+  }else if(d.indexOf('1')===0&&d.length===11){
+    var ac=d.slice(1,4);
+    r.push(['Estrutura do número','+1 (país) · '+ac+' (código de área) · '+d.slice(4,7)+' (central) · '+d.slice(7)+' (linha)'],['Plano de numeração','NANP: o +1 é compartilhado por EUA, Canadá e países do Caribe; o código de área '+ac+' define a região']);
+  }else if(d.indexOf('351')===0&&d.length===12){
+    var nn=d.slice(3);
+    r.push(['Estrutura do número','+351 (Portugal) · '+nn.slice(0,3)+' · '+nn.slice(3,6)+' · '+nn.slice(6)],['Tipo (Portugal)',/^9[1236]/.test(nn)?'Celular (móvel)':/^2/.test(nn)?'Fixo':/^(800|808)/.test(nn)?'Número de serviço (800/808)':'Outro tipo de numeração']);
+  }
+  return r;
+}
+function phoneRender(d,c,rep,car,ddd){
+  var p=phoneInfo(d),rows=[['Número informado',d]],q;
+  if(p.br){
+    var ok=p.dddOk&&(p.tipo==='Celular'||p.tipo==='Fixo');
+    rows.push(['País','Brasil (+55)'],['DDD',p.dddOk?p.ddd+' ('+p.uf+')':p.ddd+' (inválido)'],['Tipo de linha',p.tipo],['Formato internacional','+55 '+p.ddd+' '+p.local],['Estrutura válida',ok?'Sim':'Não, confira o DDD e a quantidade de dígitos']);
+    q=['+55 '+p.ddd+' '+p.local,'('+p.ddd+') '+p.local,p.ddd+p.num,'55'+p.ddd+p.num];
+    rep.telefone={pais:'BR',ddd:p.ddd,uf:p.uf,tipo:p.tipo,numero:p.num,estruturaValida:ok};
+  }else{rows.push(['Código do país','+'+(p.cc||'?')]);q=['+'+d,d];rep.telefone={numero:d}}
+  rows.push(['Operadora de origem (pode ter sido portada)',car.txt]);if(p.br)rows.push(['Operadora atual','Só a ABR Telecom confirma a portabilidade (exige captcha). Use o botão "Operadora atual (ABR Telecom)" abaixo.']);if(rep.telefone&&car.data)rep.telefone.operadora=car.data;
+  var ex=phoneExtras(p,d);ex.forEach(function(r){rows.push(r)});
+  var deep=phoneDeep(p,d);deep.forEach(function(r){rows.push(r)});
+  if(rep.telefone){rep.telefone.detalhes={};deep.forEach(function(x){rep.telefone.detalhes[x[0]]=x[1]})}
+  if(ddd&&ddd.cidades&&ddd.cidades.length){
+    var nc=ddd.cidades.length,show=ddd.cidades.slice(0,40);
+    if(nc>40)show.push('e mais '+(nc-40)+' cidades (lista completa no JSON)');
+    rows.push(['Cidades atendidas pelo DDD '+p.ddd+' ('+nc+')',show]);
+    if(rep.telefone)rep.telefone.cidadesDdd={total:nc,cidades:ddd.cidades};
+  }
+  var cd=car.data||{},obsRow=null,fonteObs=[];
+  ex.forEach(function(r){if(r[0]==='Observações')obsRow=r[1]});
+  if(cd.tipo){
+    rows.push(['Tipo segundo a fonte',LINETYPE[cd.tipo]||cd.tipo]);
+    if(p.br&&cd.tipo==='mobile'&&p.tipo==='Fixo')fonteObs.push('A fonte classifica como celular, mas a estrutura é de linha fixa');
+    if(p.br&&cd.tipo==='fixed_line'&&p.tipo==='Celular')fonteObs.push('A fonte classifica como fixo, mas a estrutura é de celular');
+    if(cd.tipo==='voip')fonteObs.push('Linha VoIP: não está ligada a um chip de operadora móvel e é mais fácil de criar e descartar');
+    if(cd.tipo==='premium_rate'||cd.tipo==='shared_cost')fonteObs.push('Número de tarifa especial, atenção a cobranças');
+  }
+  if(cd.regiao||cd.pais)rows.push(['Localização segundo a fonte',[cd.regiao,cd.pais].filter(Boolean).join(', ')]);
+  var hh=null;
+  if(p.br&&p.dddOk){try{hh=(+new Date().toLocaleString('en-GB',{timeZone:(UFTZ[p.uf]||['America/Sao_Paulo'])[0],hour:'2-digit',hour12:false}))%24}catch(e){}}
+  if(hh!=null&&!isNaN(hh))rows.push(['Horário para contato',hh>=8&&hh<20?'Dentro do horário comercial local (8h às 20h)':'Fora do horário comercial local (8h às 20h)']);
+  if(fonteObs.length)rows.push(['Observações da fonte',fonteObs]);
+  var fic=!!(obsRow&&obsRow.some(function(o){return /fictício/.test(o)}));
+  var resumo=(p.br?[ok?(p.tipo==='Celular'?'Celular':'Fixo')+' com estrutura válida':'Estrutura inválida, confira DDD e dígitos',p.uf?UFN[p.uf]:'']:[ccName(d)?ccName(d).nome:'Número internacional']).concat([cd.operadora?'operadora de origem '+cd.operadora:'',cd.tipo==='voip'?'linha VoIP':'',fic?'possível número fictício':'']).filter(Boolean).join(' · ');
+  rows.splice(1,0,['Resumo',resumo]);
+  if(rep.telefone){rep.telefone.resumo=resumo;if(cd.tipo)rep.telefone.tipoSegundoFonte=cd.tipo}
+  if(p.br&&p.num.length===8&&/^[6-9]/.test(p.num)){var n9='9'+p.num,l9=n9.slice(0,5)+'-'+n9.slice(5);q.push('('+p.ddd+') '+l9,p.ddd+n9,'55'+p.ddd+n9)}
+  if(rep.telefone){rep.telefone.formatoE164='+'+(p.br?'55'+p.ddd+p.num:d);if(p.br){rep.telefone.regiaoDDD=DDDR[+p.ddd]||null;rep.telefone.estado=p.uf?UFN[p.uf]:null}else{var cn=ccName(d);rep.telefone.paisProvavel=cn?cn.nome:null}}
+  c.rows(rows);
+  var cps=el('div','links');cps.style.marginTop='14px';
+  [['Copiar +'+(p.br?'55'+p.ddd+p.num:d),'+'+(p.br?'55'+p.ddd+p.num:d)],['Copiar '+(p.br?'('+p.ddd+') '+p.local:d),p.br?'('+p.ddd+') '+p.local:d],['Copiar só dígitos',p.br?p.ddd+p.num:d],['Copiar link do WhatsApp','https://wa.me/'+p.full],['Copiar link tel:','tel:+'+p.full]].forEach(function(f){
+    var a=linkEl(f[0],'#','fa-regular fa-copy');a.removeAttribute('target');var sp=a.querySelector('span');
+    a.addEventListener('click',function(ev){ev.preventDefault();copyText(f[1],function(ok){sp.textContent=ok?'Copiado!':'Não foi possível copiar';setTimeout(function(){sp.textContent=f[0]},1500)})});
+    cps.appendChild(a)});
+  c.add(cps);
+  var gq=encodeURIComponent(q.map(function(v){return '"'+v+'"'}).join(' OR '));
+  var w=el('div','links');w.style.marginTop='14px';
+  if(p.br)w.appendChild(linkEl('Operadora atual (ABR Telecom)','https://consultanumero.abrtelecom.com.br/','fa-solid fa-tower-cell'));
+  [['WhatsApp','https://wa.me/'+p.full,'fa-brands fa-whatsapp'],['Telegram','https://t.me/+'+p.full,'fa-brands fa-telegram'],['Google (variações)','https://www.google.com/search?q='+gq,'fa-brands fa-google'],['Bing (variações)','https://www.bing.com/search?q='+gq,'fa-solid fa-magnifying-glass'],['DuckDuckGo','https://duckduckgo.com/?q='+gq,'fa-solid fa-magnifying-glass'],['Signal','https://signal.me/#p/+'+p.full,'fa-solid fa-comment-dots']].concat(p.br?[['Truecaller','https://www.truecaller.com/search/br/'+p.ddd+p.num,'fa-solid fa-address-book'],['Sync.me','https://sync.me/search/?number='+encodeURIComponent('+'+p.full),'fa-solid fa-address-book']]:[]).forEach(function(l){w.appendChild(linkEl(l[0],l[1],l[2]))});
+  c.add(w);
+  var sq=function(site){return 'https://www.google.com/search?q='+encodeURIComponent('site:'+site+' ('+q.map(function(v){return '"'+v+'"'}).join(' OR ')+')')};
+  var w2=el('div','links');w2.style.marginTop='10px';
+  [['Facebook',sq('facebook.com'),'fa-brands fa-facebook-f'],['Instagram',sq('instagram.com'),'fa-brands fa-instagram'],['LinkedIn',sq('linkedin.com'),'fa-brands fa-linkedin-in'],['OLX',sq('olx.com.br'),'fa-solid fa-tag'],['Mercado Livre',sq('mercadolivre.com.br'),'fa-solid fa-cart-shopping'],['Documentos (PDF)','https://www.google.com/search?q='+encodeURIComponent('filetype:pdf ('+q.map(function(v){return '"'+v+'"'}).join(' OR ')+')'),'fa-solid fa-file-pdf'],['Tellows (denúncias)','https://www.tellows.com.br/num/'+encodeURIComponent(p.br?p.ddd+p.num:d),'fa-solid fa-triangle-exclamation'],['X (Twitter)',sq('x.com'),'fa-brands fa-x-twitter'],['TikTok',sq('tiktok.com'),'fa-brands fa-tiktok'],['YouTube',sq('youtube.com'),'fa-brands fa-youtube'],['Reclame Aqui',sq('reclameaqui.com.br'),'fa-solid fa-bullhorn'],['Google Maps (empresas)','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.br?'('+p.ddd+') '+p.local:'+'+d),'fa-solid fa-map-location-dot'],['Jusbrasil (processos)',sq('jusbrasil.com.br'),'fa-solid fa-scale-balanced'],['Telelistas',sq('telelistas.net'),'fa-solid fa-book'],['CNPJ (Casa dos Dados)',sq('casadosdados.com.br'),'fa-solid fa-building-columns'],['Bing (somente dígitos)','https://www.bing.com/search?q='+encodeURIComponent('"'+(p.br?p.ddd+p.num:d)+'"'),'fa-solid fa-magnifying-glass']].concat(p.br?[['Qual Empresa Me Ligou (PJ)','https://www.qualempresameligou.com.br/','fa-solid fa-building']]:[]).forEach(function(l){w2.appendChild(linkEl(l[0],l[1],l[2]))});
+  c.add(w2);
+  c.note('A busca cobre as formas mais comuns de escrever o número. O titular da linha não é dado público e não é consultado. A operadora atual só é confirmada na ABR Telecom (portabilidade) e o Qual Empresa Me Ligou cobre apenas números de empresas. WhatsApp e Telegram só confirmam a conta ao abrir o link.');
+  return Promise.resolve();
+}
+
+var LINETYPE={mobile:'Celular',fixed_line:'Fixo',fixed_line_or_mobile:'Fixo ou celular',toll_free:'Gratuito (0800)',premium_rate:'Tarifa premium',shared_cost:'Custo compartilhado',voip:'VoIP',personal_number:'Número pessoal',pager:'Pager',uan:'Número corporativo (UAN)',voicemail:'Caixa postal'};
+/* operadora da linha via Worker (/phone). Só dados técnicos de numeração; o titular da linha não é consultado. */
+function carrierLookup(d){
+  var p=phoneInfo(d),n=p.br?p.full:d;
+  if(!OSINT_API)return Promise.resolve({txt:'',data:null});
+  return fetchJSON(OSINT_API.replace(/\/$/,'')+'/phone?n='+encodeURIComponent(n),null,5000).then(function(j){
+    if(j.configured===false)return{txt:'',data:null};
+    if(j.valid===false)return{txt:'Número não reconhecido pela fonte',data:{valido:false}};
+    var t=j.carrier||'Não informada pela fonte';
+    return{txt:t,data:{operadora:j.carrier||null,tipo:j.type||null,pais:j.country||null,regiao:j.region||null,fonte:j.source||null}};
+  }).catch(function(e){return{txt:'Indisponível agora ('+e.message+')',data:null}});
+}
+
+function copyBtns(list){
+  var cp=el('div','links');cp.style.marginTop='14px';
+  list.forEach(function(f){var a=linkEl(f[0],'#','fa-regular fa-copy');a.removeAttribute('target');var sp=a.querySelector('span');
+    a.addEventListener('click',function(ev){ev.preventDefault();copyText(f[1],function(ok){sp.textContent=ok?'Copiado!':'Não foi possível copiar';setTimeout(function(){sp.textContent=f[0]},1500)})});
+    cp.appendChild(a)});
+  return cp;
+}
+function ts2d(t){return t&&t.length>=8?t.slice(6,8)+'/'+t.slice(4,6)+'/'+t.slice(0,4):''}
+function sha256(s){
+  if(!(window.crypto&&crypto.subtle))return Promise.reject(new Error('sem crypto'));
+  return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(function(b){return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')});
+}
+function linkEl(txt,url,icon){var a=el('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';var i=el('i',icon);i.setAttribute('aria-hidden','true');a.appendChild(i);a.appendChild(el('span',null,txt));return a}
+function waybackCard(d,c,rep){
+  c.loading();
+  var e=encodeURIComponent(d);
+  var avail=function(host){return function(){return fetchJSON('https://'+host+'/wayback/available?url='+e,null,8000).then(function(j){
+    var s=j&&j.archived_snapshots&&j.archived_snapshots.closest;
+    return s?{ts:s.timestamp,st:s.status,url:String(s.url).replace(/^http:/,'https:')}:false;
+  })}};
+  var cdx=function(){return fetchJSON('https://web.archive.org/cdx/search/cdx?url='+e+'&output=json&limit=-1&fl=timestamp,statuscode',null,12000).then(function(j){
+    if(!Array.isArray(j)||j.length<2)return false;
+    var r=j[j.length-1];
+    return{ts:r[0],st:r[1],url:'https://web.archive.org/web/'+r[0]+'/https://'+d};
+  })};
+  var all=function(){var w=el('div','links');w.style.marginTop='14px';w.appendChild(linkEl('Todas as capturas','https://web.archive.org/web/*/'+d,'fa-solid fa-list'));return w};
+  return firstOk([avail('archive.org'),avail('web.archive.org'),cdx]).then(function(s){
+    if(!s){c.rows([['Capturas','Nenhuma no Internet Archive']]);c.add(all());rep.wayback=null;return}
+    c.rows([['Captura mais recente',ts2d(s.ts)],['Status HTTP',s.st]]);
+    var w=el('div','links');w.style.marginTop='14px';
+    w.appendChild(linkEl('Ver captura',s.url,'fa-solid fa-clock-rotate-left'));
+    w.appendChild(linkEl('Todas as capturas','https://web.archive.org/web/*/'+d,'fa-solid fa-list'));
+    c.add(w);rep.wayback={ultima:s.ts,url:s.url};
+  }).catch(function(er){
+    rep.wayback=null;
+    c.error('Não foi possível consultar o Internet Archive agora ('+((er&&er.message)||'sem resposta')+'). Isso não indica ausência de capturas: abra o link abaixo para conferir.');
+    c.add(all());
+  });
+}
+function subCard(d,c,rep){
+  c.loading();
+  if(!OSINT_API){c.error('Configure OSINT_API com a URL do seu Worker para listar subdomínios.');rep.subdominios=null;return Promise.resolve()}
+  return fetchJSON(OSINT_API.replace(/\/$/,'')+'/domain?d='+encodeURIComponent(d),null,15000).then(function(j){
+    c.rows([['Subdomínios encontrados',String(j.totalSubdomains)],['Primeiro certificado',j.first?fmtDate(j.first):''],['Último certificado',j.last?fmtDate(j.last):''],['Subdomínios',(j.subdomains||[]).slice(0,80)]]);
+    if(j.totalSubdomains>80)c.note('Mostrando 80 de '+j.totalSubdomains+' subdomínios. O JSON traz até 300.');
+    c.note('Fonte: '+(j.source||'Certificate Transparency')+' (Certificate Transparency). Lista só subdomínios que já tiveram certificado HTTPS emitido; pode não incluir todos.');
+    rep.subdominios=j;
+  }).catch(function(e){rep.subdominios=null;c.error('Não foi possível listar subdomínios: '+e.message)});
+}
+function moreCard(d,c){
+  var e=encodeURIComponent(d),L=[['VirusTotal','https://www.virustotal.com/gui/domain/'+e,'fa-solid fa-virus'],['urlscan.io','https://urlscan.io/search/#domain%3A'+e,'fa-solid fa-camera'],['SecurityTrails','https://securitytrails.com/domain/'+e+'/dns','fa-solid fa-sitemap'],['BuiltWith (tecnologias)','https://builtwith.com/'+e,'fa-solid fa-layer-group'],['Shodan','https://www.shodan.io/search?query=hostname%3A'+e,'fa-solid fa-eye'],['Google (site:)','https://www.google.com/search?q=site%3A'+e,'fa-brands fa-google'],['Menções ao domínio','https://www.google.com/search?q=%22'+e+'%22+-site%3A'+e,'fa-solid fa-magnifying-glass'],['SSL Labs','https://www.ssllabs.com/ssltest/analyze.html?d='+e,'fa-solid fa-lock'],['Hunter (e-mails do domínio)','https://hunter.io/search/'+e,'fa-solid fa-at']];
+  if(/\.br$/.test(d))L.unshift(['Registro.br','https://registro.br/tecnologia/ferramentas/whois/?search='+e,'fa-solid fa-flag']);
+  c.links(L);
+  return Promise.resolve();
+}
+function hostCard(d,c,rep){
+  c.loading();
+  return Promise.all([dns(d,'A'),dns(d,'AAAA').catch(function(){return []})]).then(function(rr){
+    var ips=rr[0],ip6=rr[1];
+    if(!ips.length)throw new Error('sem IP');
+    return geoLookup(ips[0]).catch(function(){return null}).then(function(g){
+      c.rows([['IPs (A)',ips],['IPs (AAAA, IPv6)',ip6],['País',g&&g.pais],['Cidade',g&&g.cidade],['Provedor',g&&(g.org||g.isp)],['ASN',g&&g.asn]]);
+      c.note('Dados do primeiro IP. CDNs como Cloudflare mostram o IP da CDN, não do servidor de origem.');
+      rep.hospedagem={ips:ips,ipv6:ip6,geo:g};
+    });
+  }).catch(function(){c.error('O domínio não tem IP público ou o DNS não respondeu.')});
+}
+function internetCard(ip,c,rep){
+  c.loading();
+  var ptr=arpa(ip);
+  return Promise.all([
+    fetchJSON('https://internetdb.shodan.io/'+encodeURIComponent(ip)).catch(function(e){return e.message==='404'?{}:null}),
+    ptr?dns(ptr,'PTR').catch(function(){return []}):Promise.resolve([])
+  ]).then(function(r){
+    var d=r[0],p=r[1];
+    if(d===null&&!p.length)throw new Error('sem resposta');
+    d=d||{};
+    c.rows([['DNS reverso',p],['Portas abertas',(d.ports||[]).map(String)],['Hostnames',d.hostnames||[]],['Tecnologias',d.cpes||[]],['Tags',d.tags||[]],['Vulnerabilidades',d.vulns||[]]]);
+    c.note('Fonte: Shodan InternetDB (varredura passiva, pode estar desatualizada). Não consultamos o alvo diretamente.');
+    rep.exposicao={ptr:p,dados:d};
+  }).catch(function(e){c.error('Não foi possível consultar a exposição do IP: '+e.message)});
+}
+function emailPresence(em,c,rep){
+  c.loading();
+  var gr=sha256(em).then(function(h){return fetchJSON('https://api.gravatar.com/v3/profiles/'+h)}).catch(function(e){return e.message==='404'?false:null});
+  var gh=fetchJSON('https://api.github.com/search/users?q='+encodeURIComponent(em)+'+in:email').catch(function(){return null});
+  return Promise.all([gr,gh]).then(function(r){
+    var g=r[0],h=r[1],rows=[];
+    if(g===null&&h===null)throw new Error('as fontes não responderam');
+    rows.push(['Gravatar',g===false?'Sem perfil público':(g?'Perfil encontrado':'Não verificado')]);
+    if(g){rows.push(['Nome',g.display_name],['Local',g.location],['Cargo',g.job_title],['Contas ligadas',(g.verified_accounts||[]).map(function(a){return a.service_label})]);}
+    var users=h&&h.items?h.items.map(function(u){return u.login}):[];
+    rows.push(['GitHub (e-mail público)',h===null?'Não verificado':(users.length?users:'Nenhum perfil com este e-mail público')]);
+    c.rows(rows);
+    if(g&&safeUrl(g.avatar_url)){var im=el('img');im.src=g.avatar_url;im.alt='Foto pública do perfil Gravatar';im.width=64;im.height=64;im.referrerPolicy='no-referrer';im.style.cssText='border-radius:12px;margin-top:12px;display:block';c.add(im)}
+    if(g&&g.profile_url){var w=el('div','links');w.style.marginTop='14px';w.appendChild(linkEl('Abrir perfil Gravatar',g.profile_url,'fa-solid fa-user'));c.add(w)}
+    c.note('Só aparecem dados que a própria pessoa deixou públicos. Vazamentos aparecem no card ao lado.');
+    rep.presenca={gravatar:g||null,github:users};
+  }).catch(function(e){c.error('Não foi possível verificar a presença pública: '+e.message)});
+}
+/* URL do seu Worker (veja worker.js). Vazio = usa só as 7 plataformas verificáveis pelo navegador. */
+var OSINT_API='https://osint-av2.av2company-adm.workers.dev';
+var UC=[
+ ['GitHub',function(u){return 'https://api.github.com/users/'+u},function(u){return 'https://github.com/'+u},function(j){return (j.name||'')+(j.public_repos!=null?' · '+j.public_repos+' repositórios':'')}],
+ ['GitLab',function(u){return 'https://gitlab.com/api/v4/users?username='+u},function(u){return 'https://gitlab.com/'+u},function(j){return j.length?(j[0].name||''):null}],
+ ['Hacker News',function(u){return 'https://hacker-news.firebaseio.com/v0/user/'+u+'.json'},function(u){return 'https://news.ycombinator.com/user?id='+u},function(j){return j?'karma '+j.karma:null}],
+ ['DEV',function(u){return 'https://dev.to/api/users/by_username?url='+u},function(u){return 'https://dev.to/'+u},function(j){return j&&j.name?j.name:''}],
+ ['Lichess',function(u){return 'https://lichess.org/api/user/'+u},function(u){return 'https://lichess.org/@/'+u},function(j){return j&&j.username?'':null}],
+ ['Chess.com',function(u){return 'https://api.chess.com/pub/player/'+u.toLowerCase()},function(u){return 'https://www.chess.com/member/'+u.toLowerCase()},function(j){return j&&j.username?'':null}],
+ ['Codeberg',function(u){return 'https://codeberg.org/api/v1/users/'+u},function(u){return 'https://codeberg.org/'+u},function(j){return j&&j.login?(j.full_name||''):null}]
+];
+/* ===== Username: fontes com API pública (dados reais) ===== */
+function ujget(url,ms){
+  var c=new AbortController(),t=setTimeout(function(){c.abort()},ms||9000);
+  return fetch(url,{signal:c.signal}).then(function(r){
+    return r.text().then(function(tx){clearTimeout(t);var j=null;try{j=JSON.parse(tx)}catch(e){}return{s:r.status,j:j}});
+  },function(e){clearTimeout(t);throw e});
+}
+function ustrip(h){return h==null?'':String(h).replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\s+/g,' ').trim()}
+function ucut(s,n){s=String(s==null?'':s).trim();return s.length>n?s.slice(0,n-1)+'…':s}
+function unf(n){return n==null||n===''||isNaN(n)?'':Number(n).toLocaleString('pt-BR')}
+function cnt(n,s){return n==null||n===''||isNaN(n)?'':unf(n)+' '+s}
+function tms(v){if(v==null||v==='')return null;var d=typeof v==='number'?new Date(v<1e11?v*1000:v):new Date(v);return isNaN(d.getTime())?null:d.getTime()}
+function uniq(a){var s={},o=[];a.forEach(function(v){v=String(v==null?'':v).trim();var k=v.toLowerCase();if(v&&!s[k]){s[k]=1;o.push(v)}});return o}
+function normUrl(v){v=String(v||'').trim();if(/^https?:\/\//i.test(v))return v;if(/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(v))return 'https://'+v;return ''}
+function dlOf(rows){
+  var dl=el('dl');
+  rows.forEach(function(r){var v=r[1];if(v==null||v===''||(Array.isArray(v)&&!v.length))return;
+    dl.appendChild(el('dt',null,r[0]));var dd=el('dd');
+    if(Array.isArray(v))v.forEach(function(x){dd.appendChild(el('span','tag',x))});else dd.textContent=String(v);
+    dl.appendChild(dd)});
+  return dl;
+}
+function MA(h){return{n:'Mastodon ('+h+')',u:function(x){return 'https://'+h+'/api/v1/accounts/lookup?acct='+x},p:function(x){return 'https://'+h+'/@'+x},f:function(j){
+  if(!j.id)return null;var fl=j.fields||[];
+  return{nome:j.display_name,bio:j.note,seg:j.followers_count,posts:cnt(j.statuses_count,'publicações'),criado:j.created_at,
+    extra:fl.map(function(f){return[f.name,ustrip(f.value)]}),
+    pv:fl.map(function(f){var v=ustrip(f.value);return normUrl(v)?['site',v]:null}).filter(Boolean)};
+}}}
+function WK(l){return{n:'Wikipedia ('+l+')',u:function(x){return 'https://'+l+'.wikipedia.org/w/api.php?action=query&list=users&ususers='+x+'&usprop=registration%7Ceditcount%7Cgroups&format=json&origin=*'},p:function(x){return 'https://'+l+'.wikipedia.org/wiki/Special:Contributions/'+x},f:function(j){
+  var t=j.query&&j.query.users&&j.query.users[0];
+  if(!t||t.missing!==undefined||t.invalid!==undefined)return null;
+  return{criado:t.registration,posts:cnt(t.editcount,'edições'),extra:[['Grupos',(t.groups||[]).filter(function(g){return g!=='*'&&g!=='user'}).join(', ')]]};
+}}}
+var UP=[
+ {n:'GitHub',u:function(x){return 'https://api.github.com/users/'+x},p:function(x){return 'https://github.com/'+x},f:function(j){
+   if(!j.login)return null;
+   return{nome:j.name,bio:j.bio,local:j.location,empresa:j.company,site:j.blog,email:j.email,criado:j.created_at,seg:j.followers,posts:cnt(j.public_repos,'repositórios'),avatar:j.avatar_url,
+     pv:[j.twitter_username?['user',j.twitter_username,'X (Twitter)']:null,normUrl(j.blog)?['site',j.blog]:null].filter(Boolean)};
+ }},
+ {n:'GitLab',u:function(x){return 'https://gitlab.com/api/v4/users?username='+x},p:function(x){return 'https://gitlab.com/'+x},f:function(j){
+   if(!Array.isArray(j)||!j.length)return null;var t=j[0];
+   return{nome:t.name,avatar:t.avatar_url,url:t.web_url,extra:[['Situação',t.state]]};
+ }},
+ {n:'Hacker News',nn:1,u:function(x){return 'https://hacker-news.firebaseio.com/v0/user/'+x+'.json'},p:function(x){return 'https://news.ycombinator.com/user?id='+x},f:function(j){
+   return{bio:j.about,criado:j.created,extra:[['Karma',unf(j.karma)]],posts:cnt((j.submitted||[]).length,'itens enviados')};
+ }},
+ {n:'DEV',u:function(x){return 'https://dev.to/api/users/by_username?url='+x},p:function(x){return 'https://dev.to/'+x},f:function(j){
+   if(!j.id&&!j.username)return null;
+   return{nome:j.name,bio:j.summary,local:j.location,site:j.website_url,criado:j.joined_at,avatar:j.profile_image,
+     pv:[j.github_username?['user',j.github_username,'GitHub']:null,j.twitter_username?['user',j.twitter_username,'X (Twitter)']:null,normUrl(j.website_url)?['site',j.website_url]:null].filter(Boolean)};
+ }},
+ {n:'Lichess',u:function(x){return 'https://lichess.org/api/user/'+x},p:function(x){return 'https://lichess.org/@/'+x},f:function(j){
+   if(!j.username)return null;var P=j.profile||{};
+   return{nome:P.realName||P.firstName,bio:P.bio,local:P.location||P.country,criado:j.createdAt,posts:cnt(j.count&&j.count.all,'partidas'),
+     extra:[['Situação',j.disabled?'Conta encerrada':''],['Links',P.links?String(P.links).split(/\s+/).filter(Boolean):[]]],
+     pv:(P.links?String(P.links).split(/\s+/):[]).filter(function(l){return normUrl(l)}).map(function(l){return['site',l]})};
+ }},
+ {n:'Chess.com',u:function(x){return 'https://api.chess.com/pub/player/'+x.toLowerCase()},p:function(x){return 'https://www.chess.com/member/'+x.toLowerCase()},f:function(j){
+   if(!j.username)return null;
+   return{nome:j.name,local:j.location,criado:j.joined,seg:j.followers,avatar:j.avatar,extra:[['Status',j.status],['País',String(j.country||'').split('/').pop()]]};
+ }},
+ {n:'Codeberg',u:function(x){return 'https://codeberg.org/api/v1/users/'+x},p:function(x){return 'https://codeberg.org/'+x},f:function(j){
+   if(!j.login)return null;
+   return{nome:j.full_name,bio:j.description,local:j.location,site:j.website,criado:j.created,seg:j.followers_count,avatar:j.avatar_url,email:/noreply/.test(j.email||'')?'':j.email,pv:normUrl(j.website)?[['site',j.website]]:[]};
+ }},
+ {n:'Gitea',u:function(x){return 'https://gitea.com/api/v1/users/'+x},p:function(x){return 'https://gitea.com/'+x},f:function(j){
+   if(!j.login)return null;
+   return{nome:j.full_name,bio:j.description,local:j.location,site:j.website,criado:j.created,seg:j.followers_count,avatar:j.avatar_url,email:/noreply/.test(j.email||'')?'':j.email};
+ }},
+ {n:'Gitee',u:function(x){return 'https://gitee.com/api/v5/users/'+x},p:function(x){return 'https://gitee.com/'+x},f:function(j){
+   if(!j.login)return null;
+   return{nome:j.name,bio:j.bio,site:j.blog,criado:j.created_at,seg:j.followers,posts:cnt(j.public_repos,'repositórios'),avatar:j.avatar_url};
+ }},
+ {n:'Bitbucket',u:function(x){return 'https://api.bitbucket.org/2.0/workspaces/'+x},p:function(x){return 'https://bitbucket.org/'+x},f:function(j){
+   if(!j.slug)return null;return{nome:j.name,criado:j.created_on};
+ }},
+ {n:'Keybase',u:function(x){return 'https://keybase.io/_/api/1.0/user/lookup.json?usernames='+x+'&fields=basics,profile,proofs_summary'},p:function(x){return 'https://keybase.io/'+x},f:function(j){
+   var t=j.them&&j.them[0];if(!t)return null;var P=t.profile||{},pr=((t.proofs_summary||{}).all)||[];
+   return{nome:P.full_name,bio:P.bio,local:P.location,criado:t.basics&&t.basics.ctime,
+     extra:pr.map(function(a){return[a.proof_type,a.nametag]}),
+     pv:pr.map(function(a){return /^(twitter|github|reddit|hackernews|mastodon)$/.test(a.proof_type)?['user',a.nametag,a.proof_type]:(a.proof_type==='dns'||a.proof_type==='generic_web_site'?['site',a.nametag]:null)}).filter(Boolean)};
+ }},
+ {n:'Bluesky',no:[400,404],u:function(x){return 'https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor='+x+'.bsky.social'},p:function(x){return 'https://bsky.app/profile/'+x+'.bsky.social'},f:function(j){
+   if(!j.did)return null;
+   return{nome:j.displayName,bio:j.description,seg:j.followersCount,posts:cnt(j.postsCount,'posts'),criado:j.createdAt,avatar:j.avatar};
+ }},
+ MA('mastodon.social'),MA('mastodon.online'),MA('fosstodon.org'),MA('infosec.exchange'),MA('hachyderm.io'),MA('mas.to'),MA('mstdn.social'),MA('techhub.social'),
+ {n:'Lemmy (lemmy.world)',no:[400,404],u:function(x){return 'https://lemmy.world/api/v3/user?username='+x},p:function(x){return 'https://lemmy.world/u/'+x},f:function(j){
+   var v=j.person_view;if(!v||!v.person)return null;
+   return{nome:v.person.display_name,bio:v.person.bio,criado:v.person.published,posts:[cnt(v.counts&&v.counts.post_count,'posts'),cnt(v.counts&&v.counts.comment_count,'comentários')].filter(Boolean).join(' · ')};
+ }},
+ {n:'Reddit',u:function(x){return 'https://www.reddit.com/user/'+x+'/about.json'},p:function(x){return 'https://www.reddit.com/user/'+x},f:function(j){
+   var d=j.data;if(!d||!d.name)return null;var s=d.subreddit||{};
+   return{nome:s.title,bio:s.public_description,criado:d.created_utc,extra:[['Karma de posts',unf(d.link_karma)],['Karma de comentários',unf(d.comment_karma)],['Situação',d.is_suspended?'Conta suspensa':'']]};
+ }},
+ WK('pt'),WK('en'),
+ {n:'Stack Overflow',no:[],u:function(x){return 'https://api.stackexchange.com/2.3/users?inname='+x+'&site=stackoverflow&pagesize=20'},p:function(x){return 'https://stackoverflow.com/users?tab=newest&search='+x},f:function(j,u){
+   var it=(j.items||[]).filter(function(i){return ustrip(i.display_name).toLowerCase()===u.toLowerCase()})[0];
+   if(!it)return null;
+   return{nome:ustrip(it.display_name),local:it.location,site:it.website_url,criado:it.creation_date,url:it.link,extra:[['Reputação',unf(it.reputation)],['Atenção','Nome de exibição igual ao usuário (pode ser outra pessoa)']],pv:normUrl(it.website_url)?[['site',it.website_url]]:[]};
+ }},
+ {n:'Scratch',u:function(x){return 'https://api.scratch.mit.edu/users/'+x},p:function(x){return 'https://scratch.mit.edu/users/'+x},f:function(j){
+   if(!j.id)return null;var P=j.profile||{};return{bio:P.bio,local:P.country,criado:j.history&&j.history.joined,extra:[['Sobre',P.status]]};
+ }},
+ {n:'Codeforces',no:[400],u:function(x){return 'https://codeforces.com/api/user.info?handles='+x},p:function(x){return 'https://codeforces.com/profile/'+x},f:function(j){
+   var t=j.status==='OK'&&j.result&&j.result[0];if(!t)return null;
+   return{nome:[t.firstName,t.lastName].filter(Boolean).join(' '),local:[t.city,t.country].filter(Boolean).join(', '),empresa:t.organization,criado:t.registrationTimeSeconds,seg:t.friendOfCount,extra:[['Rank',t.rank],['Rating',t.rating]]};
+ }},
+ {n:'Codewars',u:function(x){return 'https://www.codewars.com/api/v1/users/'+x},p:function(x){return 'https://www.codewars.com/users/'+x},f:function(j){
+   if(!j.username)return null;
+   return{nome:j.name,empresa:j.clan,extra:[['Honra',unf(j.honor)],['Nível',j.ranks&&j.ranks.overall&&j.ranks.overall.name]]};
+ }},
+ {n:'Hugging Face',u:function(x){return 'https://huggingface.co/api/users/'+x+'/overview'},p:function(x){return 'https://huggingface.co/'+x},f:function(j){
+   if(!j.name)return null;
+   return{nome:j.fullname,seg:j.numFollowers,criado:j.createdAt,extra:[['Modelos',unf(j.numModels)],['Datasets',unf(j.numDatasets)]]};
+ }},
+ {n:'Docker Hub',u:function(x){return 'https://hub.docker.com/v2/users/'+x+'/'},p:function(x){return 'https://hub.docker.com/u/'+x},f:function(j){
+   if(!j.username&&!j.id)return null;return{nome:j.full_name,local:j.location,empresa:j.company,criado:j.date_joined,extra:[['Tipo',j.type]]};
+ }},
+ {n:'Crates.io',u:function(x){return 'https://crates.io/api/v1/users/'+x},p:function(x){return 'https://crates.io/users/'+x},f:function(j){
+   if(!j.user)return null;return{nome:j.user.name,site:j.user.url};
+ }},
+ {n:'Speedrun.com',u:function(x){return 'https://www.speedrun.com/api/v1/users/'+x},p:function(x){return 'https://www.speedrun.com/users/'+x},f:function(j){
+   var d=j.data;if(!d||d.id===undefined)return null;
+   return{nome:d.names&&d.names.international,local:d.location&&d.location.country&&d.location.country.names&&d.location.country.names.international,criado:d.signup};
+ }},
+ {n:'Mixcloud',u:function(x){return 'https://api.mixcloud.com/'+x+'/'},p:function(x){return 'https://www.mixcloud.com/'+x+'/'},f:function(j){
+   if(j.error||!j.username)return null;
+   return{nome:j.name,bio:j.biog,local:[j.city,j.country].filter(Boolean).join(', '),seg:j.follower_count,criado:j.created_time,posts:cnt(j.cloudcast_count,'uploads')};
+ }},
+ {n:'Dailymotion',u:function(x){return 'https://api.dailymotion.com/user/'+x+'?fields=screenname,description,created_time,followers_total,url'},p:function(x){return 'https://www.dailymotion.com/'+x},f:function(j){
+   if(!j.screenname)return null;return{nome:j.screenname,bio:j.description,seg:j.followers_total,criado:j.created_time,url:j.url};
+ }},
+ {n:'Gravatar',u:function(x){return 'https://api.gravatar.com/v3/profiles/'+x},p:function(x){return 'https://gravatar.com/'+x},f:function(j){
+   if(j.display_name===undefined&&!j.hash)return null;var va=j.verified_accounts||[];
+   return{nome:j.display_name,bio:j.description,local:j.location,empresa:j.company,avatar:j.avatar_url,
+     extra:va.map(function(a){return[a.service_label,a.url]}),
+     pv:va.map(function(a){return normUrl(a.url)?['site',a.url,a.service_label]:null}).filter(Boolean)};
+ }}
+];
+var UTR=['GitHub','GitLab','DEV','Lichess','Chess.com','Codeberg','Gitea','Keybase','Reddit'];
+function ucheck(p,u){
+  var e=encodeURIComponent(u),pu=p.p(e),no={n:p.n,s:UTR.indexOf(p.n)>-1?'no':'skip',url:pu},un={n:p.n,s:'?',url:pu},nol=p.no||[404];
+  return ujget(p.u(e),9000).then(function(r){
+    if(nol.indexOf(r.s)>-1)return no;
+    if(r.s<200||r.s>=300)return un;
+    if(r.j==null)return p.nn?no:un;
+    var d;try{d=p.f(r.j,u)}catch(x){return un}
+    if(d===null)return no;
+    if(!d)return un;
+    d.crMs=tms(d.criado);d.criado=d.crMs?new Date(d.crMs).toLocaleDateString('pt-BR'):'';
+    ['nome','bio','local','empresa','site','email'].forEach(function(k){d[k]=ucut(ustrip(d[k]),k==='bio'?280:160)});
+    d.extra=(d.extra||[]).map(function(x){var v=Array.isArray(x[1])?x[1].map(function(z){return ucut(ustrip(z),120)}):ucut(ustrip(x[1]),140);return[x[0],v]}).filter(function(x){return x[1]&&x[1].length});
+    d.pv=(d.pv||[]).filter(function(x){return x&&x[1]});
+    return{n:p.n,s:'ok',url:safeUrl(d.url)||pu,d:d,info:[d.nome,d.seg!=null&&d.seg!==''?unf(d.seg)+' seguidores':''].filter(Boolean).join(' · ')};
+  },function(){return un});
+}
+function safeUrl(u){return /^https?:\/\//i.test(u||'')?u:''}
+function breachCard(em,c,rep){
+  c.loading();
+  if(!OSINT_API){c.error('Configure OSINT_API com a URL do seu Worker para consultar vazamentos.');rep.vazamentos=null;return Promise.resolve()}
+  var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},15000);
+  return fetch(OSINT_API.replace(/\/$/,'')+'/email?e='+encodeURIComponent(em),{signal:ctl.signal}).then(function(r){
+    return r.json().then(function(j){return{ok:r.ok,j:j}},function(){return{ok:false,j:{}}});
+  }).then(function(x){
+    clearTimeout(tm);
+    if(!x.ok)throw new Error(x.j&&x.j.error||'sem resposta');
+    var j=x.j,list=j.breaches||[],pastes=j.pastes||[];
+    c.clear();
+    var dl=el('dl');
+    dl.appendChild(el('dt',null,'Situação'));dl.appendChild(el('dd',null,list.length?'Encontrado em '+list.length+' vazamento(s)':'Não consta em vazamentos conhecidos'));
+    if(pastes.length){dl.appendChild(el('dt',null,'Pastes'));dl.appendChild(el('dd',null,pastes.length+' publicação(ões) em sites de paste'))}
+    var rp=j.rep;
+    if(rp){
+      var RL={high:'Alta',medium:'Média',low:'Baixa',none:'Sem histórico'},yn=function(v){return v?'Sim':'Não'},fl=[];
+      dl.appendChild(el('dt',null,'Reputação (EmailRep)'));dl.appendChild(el('dd',null,(RL[rp.reputation]||rp.reputation)+(rp.suspicious?' · marcado como suspeito':'')));
+      if(rp.references)dl.appendChild(el('dt',null,'Referências na web')),dl.appendChild(el('dd',null,String(rp.references)));
+      if(rp.firstSeen)dl.appendChild(el('dt',null,'Visto pela 1ª vez')),dl.appendChild(el('dd',null,rp.firstSeen));
+      if(rp.lastSeen)dl.appendChild(el('dt',null,'Visto pela última vez')),dl.appendChild(el('dd',null,rp.lastSeen));
+      if(rp.deliverable!=null)dl.appendChild(el('dt',null,'Entregável')),dl.appendChild(el('dd',null,yn(rp.deliverable)+(rp.acceptAll?' (o servidor aceita qualquer endereço)':'')));
+      if(rp.blacklisted)fl.push('Em lista de bloqueio');if(rp.malicious)fl.push('Atividade maliciosa'+(rp.maliciousRecent?' recente':''));if(rp.spam)fl.push('Associado a spam');if(rp.credentialsLeaked)fl.push('Credenciais vazadas');if(rp.disposable)fl.push('Descartável');if(rp.newDomain)fl.push('Domínio novo');if(rp.suspiciousTld)fl.push('TLD suspeito');
+      if(fl.length){dl.appendChild(el('dt',null,'Alertas'));var da=el('dd');fl.forEach(function(k){da.appendChild(el('span','tag',k))});dl.appendChild(da)}
+      if(rp.profiles&&rp.profiles.length){dl.appendChild(el('dt',null,'Perfis ligados ao e-mail'));var dp=el('dd');rp.profiles.forEach(function(k){dp.appendChild(el('span','tag',k))});dl.appendChild(dp)}
+    }
+    c.add(dl);
+    var box=el('div');box.style.marginTop='14px';
+    list.slice(0,200).forEach(function(b){
+      var row=el('div');row.style.cssText='border-top:1px solid var(--line);padding:9px 0;font-size:.82rem';
+      var t=el('strong',null,b.title||b.name);row.appendChild(t);
+      var d=[b.domain,b.date?fmtDate(b.date):'',b.count?Number(b.count).toLocaleString('pt-BR')+' contas':''].filter(Boolean).join(' · ');
+      if(d){var s=el('div',null,d);s.style.color='var(--ink-2)';row.appendChild(s)}
+      var cls=b.classes||b.dataClasses||b.DataClasses||b.data_classes||b.data||b.exposed||[];if(typeof cls==='string')cls=cls.split(/\s*[,;]\s*/);
+      if(cls&&cls.length){var lb=el('div',null,'Dados vazados:');lb.style.cssText='margin-top:6px;font-size:.78rem;color:var(--ink-2)';row.appendChild(lb);var w=el('div');w.style.marginTop='4px';cls.forEach(function(k){if(k)w.appendChild(el('span','tag',String(k)))});row.appendChild(w)}
+      else{var nd=el('div',null,'A fonte não informou quais tipos de dado foram vazados.');nd.style.cssText='margin-top:4px;font-size:.78rem;color:var(--ink-2)';row.appendChild(nd)}
+      var ds=ustrip(b.description||b.desc||'');if(ds){var de=el('div',null,ucut(ds,300));de.style.cssText='margin-top:4px;font-size:.78rem;color:var(--ink-2)';row.appendChild(de)}
+      var fl2=[];if(b.verified===false||b.isVerified===false)fl2.push('Não verificado');if(b.sensitive||b.isSensitive)fl2.push('Sensível');if(b.fabricated||b.isFabricated)fl2.push('Possivelmente fabricado');
+      if(fl2.length){var fw=el('div');fw.style.marginTop='4px';fl2.forEach(function(k){fw.appendChild(el('span','tag',k))});row.appendChild(fw)}
+      box.appendChild(row);
+    });
+    c.add(box);
+    if(list.length>200)c.note('Mostrando 200 de '+list.length+' vazamentos. O JSON traz a lista completa.');
+    c.note('Fontes: '+((j.sources||[]).join(' + ')||'—')+'. Os resultados combinam as fontes e removem duplicados. Constar em um vazamento não significa que a senha atual esteja exposta.');
+    rep.vazamentos={fontes:j.sources,total:list.length,vazamentos:list,pastes:pastes,reputacao:j.rep||null};
+  }).catch(function(e){clearTimeout(tm);rep.vazamentos=null;c.clear();c.note('Não foi possível consultar vazamentos agora ('+(e&&e.name==='AbortError'?'tempo esgotado':(e&&e.message)||'falha')+'). Tente novamente em instantes.')});
+}
+
+function stealerCard(em,c,rep){
+  c.loading();
+  if(!OSINT_API){c.error('Configure OSINT_API com a URL do seu Worker para consultar infostealers.');rep.infostealer=null;return Promise.resolve()}
+  var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},15000);
+  return fetch(OSINT_API.replace(/\/$/,'')+'/stealer?e='+encodeURIComponent(em),{signal:ctl.signal}).then(function(r){
+    return r.json().then(function(j){return{ok:r.ok,j:j}},function(){return{ok:false,j:{}}});
+  }).then(function(x){
+    clearTimeout(tm);
+    if(!x.ok)throw new Error(x.j&&x.j.error||'sem resposta');
+    var j=x.j,list=j.stealers||[];c.clear();
+    var dl=el('dl');
+    dl.appendChild(el('dt',null,'Fonte'));dl.appendChild(el('dd',null,j.source||'Hudson Rock'));
+    dl.appendChild(el('dt',null,'Situação'));dl.appendChild(el('dd',null,list.length?'Encontrado em '+list.length+' captura(s) de malware infostealer':'Nenhuma captura de infostealer encontrada'));
+    c.add(dl);
+    var box=el('div');box.style.marginTop='14px';
+    list.forEach(function(s){
+      var row=el('div');row.style.cssText='border-top:1px solid var(--line);padding:9px 0;font-size:.82rem';
+      row.appendChild(el('strong',null,(s.family||'Infostealer')+(s.date?' · '+fmtDate(s.date):'')));
+      var d=[s.os,s.computer,s.ip?'IP '+s.ip:''].filter(Boolean).join(' · ');
+      if(d){var x=el('div',null,d);x.style.color='var(--ink-2)';row.appendChild(x)}
+      var sv=[s.user?s.user+' serviço(s) de usuário':'',s.corporate?s.corporate+' corporativo(s)':''].filter(Boolean).join(' · ');
+      if(sv){var y=el('div',null,'Credenciais capturadas: '+sv);y.style.color='var(--ink-2)';row.appendChild(y)}
+      [['Antivírus',s.antiviruses],['Logins (mascarados)',s.logins],['Senhas (mascaradas)',s.passwords]].forEach(function(g){
+        if(g[1]&&g[1].length){var w=el('div');w.style.marginTop='4px';var lb=el('span',null,g[0]+': ');lb.style.cssText='font-size:.78rem;color:var(--ink-2)';w.appendChild(lb);g[1].forEach(function(k){w.appendChild(el('span','tag',k))});row.appendChild(w)}
+      });
+      box.appendChild(row);
+    });
+    c.add(box);
+    c.note('Infostealers são malwares que roubam logins e senhas salvos no computador da vítima. Se houver captura, troque as senhas a partir de um aparelho limpo e ative a verificação em duas etapas. A fonte já mascara senhas e parte dos dados.');
+    rep.infostealer={fonte:j.source||'Hudson Rock',total:list.length,capturas:list};
+  }).catch(function(e){clearTimeout(tm);rep.infostealer=null;c.clear();c.note('Não foi possível consultar infostealers agora ('+(e&&e.name==='AbortError'?'tempo esgotado':(e&&e.message||'sem resposta'))+'). Tente novamente em instantes.')});
+}
+function accountsCard(em,c,rep,deps){
+  c.loading();
+  var api=OSINT_API?fetchJSON(OSINT_API.replace(/\/$/,'')+'/accounts?e='+encodeURIComponent(em),null,15000).then(function(j){return j.results||[]}).catch(function(){return null}):Promise.resolve(null);
+  return Promise.all([api].concat(deps.map(function(p){return cap(p,12000)}))).then(function(r){
+    var res=r[0],fo=[],nf=[],un=[];
+    (res||[]).forEach(function(x){(x.status==='found'?fo:x.status==='not_found'?nf:un).push(x.name)});
+    var p=rep.presenca,v=rep.vazamentos,rp=v&&v.reputacao,lig=[],seen={};
+    function add(n){var k=String(n||'').trim();if(k&&!seen[k.toLowerCase()]){seen[k.toLowerCase()]=1;lig.push(k)}}
+    if(p&&p.gravatar)(p.gravatar.verified_accounts||[]).forEach(function(a){add(a.service_label)});
+    if(p&&p.github&&p.github.length)add('GitHub');
+    if(rp&&rp.profiles)rp.profiles.forEach(add);
+    var vz=[],vs={};
+    if(v&&v.vazamentos)v.vazamentos.forEach(function(b){var n=b.title||b.name;if(n&&!vs[n.toLowerCase()]){vs[n.toLowerCase()]=1;vz.push(n)}});
+    var kk=function(n){return String(n).toLowerCase().split(/[\s\/(]/)[0]},kf={},kl={};
+    fo.forEach(function(n){kf[kk(n)]=1});lig=lig.filter(function(n){return !kf[kk(n)]});lig.forEach(function(n){kl[kk(n)]=1});
+    nf=nf.filter(function(n){return !kl[kk(n)]&&!kf[kk(n)]});
+    var rows=[['Cadastro confirmado',fo],['Perfis ligados ao e-mail',lig],['Serviços que vazaram este e-mail',vz.slice(0,60)],['Não encontrado nas fontes (a conta pode existir mesmo assim)',nf],['Não verificável agora',un]];
+    c.rows(rows);
+    if(!fo.length&&!lig.length&&!vz.length)c.note('Nenhum cadastro encontrado nas fontes consultadas. Isso não prova que o e-mail não tenha contas: a maioria dos serviços não permite essa checagem.');
+    if(vz.length>60)c.note('Mostrando 60 de '+vz.length+' serviços de vazamentos. O JSON traz a lista completa.');
+    c.note('Cadastro confirmado = o serviço respondeu que o e-mail já tem conta (consulta passiva, nada é enviado ao dono). Perfis ligados vêm de Gravatar, GitHub e EmailRep. Serviços de vazamentos indicam onde o e-mail já esteve cadastrado, mesmo que a conta tenha sido apagada.');
+    rep.cadastros={confirmados:fo,semCadastro:nf,naoVerificados:un,perfisLigados:lig,emVazamentos:vz};
+    if(res===null&&OSINT_API)c.note('A consulta direta aos serviços não respondeu agora.');
+    if(un.some(function(n){return /Facebook|TikTok|Kwai|Threads/.test(n)}))c.note('Facebook, TikTok, Kwai e Threads não permitem checar um e-mail sem avisar o dono da conta (só pela recuperação de senha). Por isso ficam como "Não verificável agora", e nunca como "Sem cadastro". Instagram e X são consultados pelo formulário de cadastro; se a rede bloquear a consulta, também aparecem como não verificáveis.');
+  });
+}
+function summaryCard(em,c,rep,deps){
+  c.loading();
+  return Promise.all(deps.map(function(p){return cap(p,12000)})).then(function(){
+    var v=rep.vazamentos,s=rep.infostealer,rp=v&&v.reputacao,e=rep.email,p=rep.presenca,sc=0,f=[],ok=[],fonte=[];
+    if(v){fonte.push('vazamentos');var n=v.total||0;if(n){sc+=Math.min(40,n*4);f.push('Em '+n+' vazamento(s) conhecido(s)')}else ok.push('Fora de vazamentos conhecidos')}
+    if(s){fonte.push('infostealers');if(s.total){sc+=s.total>1?50:40;f.push('Credenciais capturadas por infostealer ('+s.total+')')}else ok.push('Sem capturas de infostealer')}
+    if(rp){if(rp.suspicious){sc+=10;f.push('Marcado como suspeito')}if(rp.blacklisted){sc+=10;f.push('Em lista de bloqueio')}if(rp.malicious){sc+=10;f.push('Atividade maliciosa associada')}if(rp.spam){sc+=5;f.push('Associado a spam')}if(rp.credentialsLeaked){sc+=5;f.push('Credenciais vazadas (EmailRep)')}}
+    if(e){fonte.push('DNS');if(e.descartavel){sc+=10;f.push('Domínio de e-mail descartável')}if(e.erroDigitacao)f.push('Domínio parece erro de digitação de '+e.erroDigitacao);if(/^Corporativo/.test(e.tipo||'')&&/^Maior risco/.test(e.falsificavel||''))f.push('Domínio sem proteção contra falsificação');if(e.mx&&!e.mx.length){sc+=10;f.push('Domínio sem servidor de e-mail (MX)')}}
+    if(p){fonte.push('perfis públicos');var ct=((p.gravatar&&p.gravatar.verified_accounts)||[]).length+((p.github||[]).length);if(ct)f.push(ct+' perfil(is) público(s) ligado(s) ao e-mail')}
+    sc=Math.min(100,sc);
+    var det=!!(v||s);var nv=!det?'Indeterminado':sc<20?'Baixo':sc<50?'Médio':sc<75?'Alto':'Crítico';
+    var tx=!det?'As fontes de vazamentos e infostealers não responderam, não foi possível avaliar o risco.':(f.length?'Pontos de atenção: '+f.join('; ')+'.':'Nenhum ponto de atenção nas fontes que responderam.')+(ok.length?' Positivo: '+ok.join('; ')+'.':'');
+    if(v&&!s)tx+=' A fonte de infostealers não respondeu, o risco pode estar subestimado.';if(s&&!v)tx+=' A fonte de vazamentos não respondeu, o risco pode estar subestimado.';
+    var rec=[];
+    if(s&&s.total)rec.push('Trocar as senhas das contas ligadas a este e-mail (usando um aparelho sem malware) e ativar verificação em duas etapas.');
+    else if(v&&v.total)rec.push('Trocar as senhas dos serviços citados nos vazamentos e não reutilizar senhas.');
+    if(!rec.length&&det)rec.push('Manter verificação em duas etapas e senhas únicas por serviço.');
+    c.rows([['Nível de risco',nv+(det?' ('+sc+'/100)':'')],['Resumo',tx],['Recomendação',rec.join(' ')]]);
+    c.note('Resumo gerado por regras automáticas a partir das consultas ao lado (sem IA). A pontuação é indicativa, não é um laudo.');
+    rep.resumo={nivel:nv,pontuacao:det?sc:null,pontosDeAtencao:f,pontosPositivos:ok,recomendacao:rec};
+  });
+}
+
+/* Perfis encontrados: um único card, sem verificação manual.
+   Cada rede tem um status: existe / não existe / não verificável (a rede bloqueia consultas automáticas). */
+function userSearch(u,cf,rep){
+  var e=encodeURIComponent(u);
+  var SH=[['Instagram','https://www.instagram.com/'+e,'fa-brands fa-instagram'],['X (Twitter)','https://x.com/'+e,'fa-brands fa-x-twitter'],['Facebook','https://www.facebook.com/'+e,'fa-brands fa-facebook-f'],['LinkedIn','https://www.linkedin.com/in/'+e,'fa-brands fa-linkedin-in'],['Telegram','https://t.me/'+e,'fa-brands fa-telegram'],['TikTok','https://www.tiktok.com/@'+e,'fa-brands fa-tiktok'],['YouTube','https://www.youtube.com/@'+e,'fa-brands fa-youtube'],['GitHub','https://github.com/'+e,'fa-brands fa-github'],['Reddit','https://www.reddit.com/user/'+e,'fa-brands fa-reddit-alien'],['Pinterest','https://www.pinterest.com/'+e,'fa-brands fa-pinterest-p'],['Twitch','https://www.twitch.tv/'+e,'fa-brands fa-twitch'],['Threads','https://www.threads.net/@'+e,'fa-brands fa-threads'],['Kwai','https://www.kwai.com/@'+e,'fa-solid fa-video'],['Linktree','https://linktr.ee/'+e,'fa-solid fa-link']];
+  var PRI=['Instagram','Facebook','X (Twitter)','TikTok','Kwai','YouTube','Linktree','Threads'];
+  var G=['Pesquisar no Google','https://www.google.com/search?q=%22'+e+'%22','fa-brands fa-google'];
+  var shUrl={},shIcon={};SH.forEach(function(x){shUrl[x[0]]=x[1];shIcon[x[0]]=x[2]});
+  var auto={};
+  rep.usuario={nome:u,links:SH.concat([G]).map(function(l){return{plataforma:l[0]==='Pesquisar no Google'?'Google':l[0],url:l[1]}})};
+  function urlOf(n){return safeUrl(auto[n]&&auto[n].url)||shUrl[n]||''}
+  function names(){var l=Object.keys(auto);SH.forEach(function(x){if(l.indexOf(x[0])<0)l.push(x[0])});return l}
+  function st(n){var a=auto[n];return a&&a.s==='ok'?'ok':a&&a.s==='no'?'no':'un'}
+  function section(title,note){var h=el('p','note',title);h.style.cssText='margin:16px 0 8px;font-weight:600;color:var(--ink)';cf.add(h);if(note){var p=el('p','note',note);p.style.margin='0 0 8px';cf.add(p)}}
+  function paint(done){
+    cf.clear();
+    if(!done){var l=el('div','loading');l.appendChild(el('span','spin'));l.appendChild(el('span',null,'Consultando plataformas…'));cf.add(l);return}
+    var all=names(),nm=all.filter(function(n){return PRI.indexOf(n)<0});
+    var aok=all.filter(function(n){return st(n)==='ok'}).length,ano=all.filter(function(n){return st(n)==='no'}).length,aun=all.length-aok-ano;
+    var det=all.filter(function(n){return st(n)==='ok'&&auto[n].d});
+    section('Resumo','Usuário confirmado em '+aok+' de '+all.length+' plataformas · ausente em '+ano+' · não verificável em '+aun+'. Dados reais coletados de '+det.length+' perfil(is).');
+    var base=u.toLowerCase(),vs=[base.replace(/[._-]/g,''),base.replace(/[._-]+/g,'.'),base.replace(/[._-]+/g,'_'),base.replace(/\d+$/,'')].filter(function(v,i,a){return v&&v!==base&&v.length>=2&&a.indexOf(v)===i});
+    if(vs.length){var wv=el('div','links');vs.forEach(function(v){wv.appendChild(linkEl('Variação: @'+v,location.pathname+'?q='+encodeURIComponent('@'+v),'fa-solid fa-shuffle'))});section('Variações comuns deste usuário');cf.add(wv)}
+    section('Redes principais','Existe = perfil confirmado · Não existe = a rede confirmou a ausência · ? = a rede bloqueia consulta automática (abra o link para conferir).');
+    var wp=el('div','links');PRI.forEach(function(n){var s=st(n),inf=auto[n]&&auto[n].info,ic=s==='ok'?'fa-solid fa-circle-check':s==='no'?'fa-solid fa-circle-xmark':'fa-solid fa-circle-question';wp.appendChild(linkEl(n+(s==='ok'&&inf?' · '+inf:s==='no'?' · não existe':s==='un'?' · ?':''),urlOf(n),ic))});cf.add(wp);
+    var ok=nm.filter(function(n){return st(n)==='ok'}),un=nm.filter(function(n){return st(n)==='un'});
+    section('Existe ('+ok.length+')');
+    if(ok.length){var w=el('div','links');ok.forEach(function(n){var inf=auto[n].info;w.appendChild(linkEl(n+(inf?' · '+inf:''),urlOf(n),'fa-solid fa-circle-check'))});cf.add(w)}
+    else cf.add(el('p','note','Nenhum perfil confirmado nas plataformas verificadas.'));
+
+    /* ===== dados reais coletados ===== */
+    var pick=function(k){return uniq(det.map(function(n){return auto[n].d[k]}))};
+    var sites=[],pivs=[],seenP={};
+    det.forEach(function(n){(auto[n].d.pv||[]).forEach(function(x){
+      if(x[0]==='site'){var nu=normUrl(x[1]);if(nu&&sites.indexOf(nu)<0)sites.push(nu)}
+      else if(x[0]==='user'){var v=String(x[1]).replace(/^@/,'');if(/^[a-z0-9._-]{2,40}$/i.test(v)&&v.toLowerCase()!==base&&!seenP[v.toLowerCase()]){seenP[v.toLowerCase()]=1;pivs.push([v,(x[2]||'perfil')+' via '+n])}}
+    })});
+    var emails=pick('email');
+    if(det.length){
+      var old=det.filter(function(n){return auto[n].d.crMs}).sort(function(a,b){return auto[a].d.crMs-auto[b].d.crMs})[0];
+      section('Dados reais coletados','Consolidado dos perfis públicos confirmados. Nomes iguais em plataformas diferentes podem ser pessoas diferentes.');
+      cf.add(dlOf([['Nomes encontrados',pick('nome')],['Localizações',pick('local')],['Empresa / organização',pick('empresa')],['E-mails públicos',emails],['Conta mais antiga',old?old+' ('+auto[old].d.criado+')':'']]));
+      if(sites.length){var ws=el('div','links');ws.style.marginTop='10px';sites.slice(0,16).forEach(function(s){ws.appendChild(linkEl(s.replace(/^https?:\/\//i,'').replace(/\/$/,''),s,'fa-solid fa-globe'))});section('Sites e links encontrados nos perfis');cf.add(ws)}
+      if(pivs.length||emails.length){var wq=el('div','links');pivs.slice(0,12).forEach(function(p){wq.appendChild(linkEl('@'+p[0]+' ('+p[1]+')',location.pathname+'?q='+encodeURIComponent('@'+p[0]),'fa-solid fa-arrow-right'))});emails.forEach(function(m){if(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(m))wq.appendChild(linkEl(m,location.pathname+'?q='+encodeURIComponent(m),'fa-solid fa-envelope'))});section('Pistas para investigar em seguida');cf.add(wq)}
+      section('Detalhes por plataforma');
+      det.forEach(function(n){
+        var d=auto[n].d,box=el('div');box.style.cssText='border-top:1px solid var(--line);padding:10px 0';
+        var t=el('div');t.style.cssText='font-weight:600;font-size:.85rem;margin-bottom:6px';
+        var a=el('a',null,n);a.href=urlOf(n);a.target='_blank';a.rel='noopener noreferrer';a.style.textDecoration='underline';t.appendChild(a);box.appendChild(t);
+        box.appendChild(dlOf([['Nome',d.nome],['Bio',d.bio],['Localização',d.local],['Empresa',d.empresa],['Site',d.site],['E-mail público',d.email],['Criado em',d.criado],['Seguidores',unf(d.seg)],['Atividade',d.posts],['Foto de perfil',safeUrl(d.avatar)]].concat(d.extra||[])));
+        cf.add(box);
+      });
+    }
+
+    if(un.length){
+      section('Não verificável automaticamente ('+un.length+')','Estas redes bloqueiam consultas automáticas ou não responderam. O sistema não afirma se o perfil existe ou não nelas; os links abrem direto no perfil.');
+      var w2=el('div','links');un.forEach(function(n){w2.appendChild(linkEl(n,urlOf(n),shIcon[n]||'fa-solid fa-link'))});cf.add(w2);
+    }
+    var g=el('div','links');g.style.marginTop='14px';g.appendChild(linkEl(G[0],G[1],G[2]));cf.add(g);
+    cf.note('Nomes iguais em redes diferentes podem pertencer a pessoas diferentes.');
+    rep.verificados=all.map(function(n){var s=st(n);return{plataforma:n,status:s==='ok'?'encontrado':s==='no'?'nao_encontrado':'nao_verificavel',url:urlOf(n)||null}});
+    rep.perfis=det.map(function(n){return{plataforma:n,url:urlOf(n),dados:auto[n].d}});
+    rep.consolidado={nomes:pick('nome'),localizacoes:pick('local'),empresas:pick('empresa'),emails:emails,sites:sites,pistasUsuarios:pivs.map(function(p){return{usuario:p[0],origem:p[1]}})};
+  }
+  paint(false);
+  var NP=4,mp=function(x){return{n:x.name,s:x.status==='found'?'ok':'?',info:x.info||'',url:x.url}};
+  var wk=OSINT_API?Promise.all([0,1,2,3].map(function(k){return fetchJSON(OSINT_API.replace(/\/$/,'')+'/username?u='+e+'&k='+k+'&n='+NP,null,14000).then(function(j){return j.results||[]},function(){return[]})})).then(function(a){return [].concat.apply([],a).map(mp)}):Promise.resolve([]);
+  var br=Promise.all(UP.map(function(p){return ucheck(p,u)}));
+  return Promise.all([wk,br]).then(function(r){
+    (r[0]||[]).forEach(function(x){auto[x.n]={s:x.s,info:x.info||'',url:x.url||'',d:null}});
+    (r[1]||[]).forEach(function(x){
+      if(x.s==='skip')return;
+      if(x.s==='?'){if(!auto[x.n])auto[x.n]={s:'?',info:'',url:x.url};return}
+      auto[x.n]={s:x.s,info:x.info||'',url:x.url||'',d:x.d||null};
+    });
+  }).catch(function(){}).then(function(){paint(true)});
+}
+
+/* ===== IP: cards novos ===== */
+var WELL={'8.8.8.8':'Google Public DNS','8.8.4.4':'Google Public DNS','1.1.1.1':'Cloudflare DNS','1.0.0.1':'Cloudflare DNS','9.9.9.9':'Quad9 DNS','149.112.112.112':'Quad9 DNS','208.67.222.222':'OpenDNS (Cisco)','208.67.220.220':'OpenDNS (Cisco)','94.140.14.14':'AdGuard DNS','2001:4860:4860::8888':'Google Public DNS','2001:4860:4860::8844':'Google Public DNS','2606:4700:4700::1111':'Cloudflare DNS','2606:4700:4700::1001':'Cloudflare DNS','2620:fe::fe':'Quad9 DNS'};
+var ADV={
+privado:'Este endereço só existe dentro de redes locais, então não há geolocalização, provedor ou titular na internet pública. Quem o usa só é identificável na própria rede (tabela DHCP/ARP do roteador, logs do firewall).',
+cgnat:'O cliente compartilha um IP público com muitos outros. Para chegar a uma pessoa é preciso o IP público de saída, a porta e o horário, e só a operadora guarda esse vínculo.',
+loopback:'Aponta para o próprio aparelho. Se apareceu em um log ou formulário vindo de fora, pode ser configuração incorreta, proxy mal configurado ou tentativa de ataque (SSRF).',
+linklocal:'Só vale no segmento de rede local. Aparecer em logs costuma indicar falha de DHCP ou de configuração automática.',
+multicast:'É um endereço de grupo, não de um aparelho. Serve para descoberta de serviços e transmissão em rede.',
+documentacao:'Reservado para exemplos de manuais. Em dados reais, indica valor de teste, exemplo copiado ou endereço falsificado.',
+reservado:'Faixa reservada ou sem uso na internet. Se aparece em tráfego real, costuma ser falsificação de origem (spoofing) ou erro de configuração.',
+broadcast:'Alcança todos os aparelhos do segmento local e não identifica um host.',
+tunel:'O endereço está na internet pública e carrega um IPv4 embutido. Pesquise também esse IPv4 para chegar ao provedor real.'
+};
+var wip={};
+function workerIp(ip){
+  if(!OSINT_API)return Promise.resolve(null);
+  if(!wip[ip])wip[ip]=fetchJSON(OSINT_API.replace(/\/$/,'')+'/ip?i='+encodeURIComponent(ip),null,12000).catch(function(e){delete wip[ip];throw e});
+  return wip[ip];
+}
+function ipClassCard(ip,c,rep){
+  var i=ipInfo(ip);
+  if(!i){c.error('Endereço não reconhecido.');return Promise.resolve()}
+  var cl=i.cls,tc=current||{},rows=[],piv=[],emb=i.emb,notes=(tc.note||[]).slice(),mac='';
+  rows.push(['Endereço',ip],['Versão','IPv'+i.ver],['Categoria',cl.nome],['Escopo',cl.escopo],['Norma',cl.rfc],['Roteável na internet pública',i.pub?'Sim':'Não'],['O que significa',cl.desc]);
+  if(WELL[ip])rows.push(['Serviço conhecido',WELL[ip]+' (anycast: a localização aponta para o ponto de presença mais próximo, não para um servidor único)']);
+  if(i.ver===4){
+    var o=i.o,hc=o[0]<128?'A':o[0]<192?'B':o[0]<224?'C':o[0]<240?'D (multicast)':'E (reservado)';
+    if(cl.kind==='privado'&&(o[3]===1||o[3]===254))rows.push(['Dica','Termina em .1 ou .254: costuma ser o roteador (gateway) da rede']);
+    rows.push(['Classe histórica',hc],['Inteiro decimal',String(i.n)],['Hexadecimal','0x'+hx(i.n,8)],['Binário',o.map(function(x){var s=x.toString(2);while(s.length<8)s='0'+s;return s}).join('.')],['Reverso (in-addr.arpa)',i.arpa]);
+  }else{
+    var g=i.g;
+    rows.push(['Forma comprimida',i.short],['Forma completa',i.full],['Reverso (ip6.arpa)',i.arpa]);
+    if(cl.kind==='multicast'){
+      var SC={1:'interface',2:'link-local (mesmo segmento)',3:'realm',4:'administrativo',5:'site',8:'organização',14:'global'},sc=SC[g[0]&15];
+      if(sc)rows.push(['Escopo do multicast',sc]);
+      if(i.short==='ff02::1')rows.push(['Grupo conhecido','Todos os nós do segmento']);
+      else if(i.short==='ff02::2')rows.push(['Grupo conhecido','Todos os roteadores do segmento']);
+      else if(i.short==='ff02::fb')rows.push(['Grupo conhecido','mDNS / Bonjour']);
+      else if(i.short==='ff02::1:2')rows.push(['Grupo conhecido','Servidores e relays DHCPv6']);
+    }
+    if(cl.iid){
+      rows.push(['Prefixo de rede (/64)',v6short([g[0],g[1],g[2],g[3],0,0,0,0])+'/64'],['Identificador da interface',[g[4],g[5],g[6],g[7]].map(function(x){return hx(x,4)}).join(':')]);
+      if((g[5]&255)===255&&(g[6]>>8)===254){
+        mac=[(g[4]>>8)^2,g[4]&255,g[5]>>8,g[6]&255,g[7]>>8,g[7]&255].map(function(x){return hx(x,2)}).join(':');
+        rows.push(['Tipo de identificador','EUI-64: derivado do endereço MAC da placa de rede'],['MAC deduzido',mac]);
+      }else if(!g[4]&&!g[5]&&!g[6])rows.push(['Tipo de identificador','Endereço baixo (configurado manualmente ou servidor)']);
+      else rows.push(['Tipo de identificador','Aleatório ou opaco (extensões de privacidade), não revela o MAC']);
+    }
+  }
+  if(emb){
+    rows.push(['IPv4 embutido ('+emb.tipo+')',emb.ipv4]);
+    if(emb.servidor)rows.push(['Servidor Teredo',emb.servidor]);
+    if(emb.porta!=null)rows.push(['Porta do cliente',String(emb.porta)]);
+    piv.push(['Pesquisar o IPv4 embutido ('+emb.ipv4+')',emb.ipv4]);
+  }
+  if(tc.cidr!=null){
+    if(i.ver===4){var nb=tc.cidr,sh=Math.pow(2,32-nb),net=Math.floor(i.n/sh)*sh;rows.push(['Faixa informada',v4str(net)+'/'+nb],['Máscara',v4str(4294967296-sh)],['Primeiro endereço',v4str(net)],['Último endereço',v4str(net+sh-1)],['Total de endereços',sh.toLocaleString('pt-BR')])}
+    else rows.push(['Faixa informada',ip+'/'+tc.cidr],['Total de endereços','2^'+(128-tc.cidr)],['Sub-redes /64 na faixa',tc.cidr<=64?'2^'+(64-tc.cidr):'Faixa menor que uma /64']);
+  }
+  rows.push(['Observações da leitura',notes]);
+  c.rows(rows);
+  if(piv.length||mac){
+    var w=el('div','links');w.style.marginTop='14px';
+    piv.forEach(function(p){w.appendChild(linkEl(p[0],location.pathname+'?q='+encodeURIComponent(p[1]),'fa-solid fa-arrow-right'))});
+    if(mac)w.appendChild(linkEl('Fabricante do MAC (OUI)','https://maclookup.app/search/result?mac='+encodeURIComponent(mac),'fa-solid fa-microchip'));
+    c.add(w);
+  }
+  if(!i.pub)c.note('Sem presença na internet pública: não há geolocalização, ASN, titular ou reputação para consultar. '+(ADV[cl.kind]||''));
+  else if(ADV[cl.kind]&&cl.kind==='tunel')c.note(ADV.tunel+' As consultas seguintes usam o endereço IPv6 informado.');
+  rep.classificacao={ip:ip,versao:i.ver,categoria:cl.nome,escopo:cl.escopo,norma:cl.rfc,roteavel:i.pub,ipv4Embutido:emb?emb.ipv4:null,macDeduzido:mac||null,faixa:tc.cidr!=null?tc.cidr:null};
+  return Promise.resolve();
+}
+function whoisFields(j){
+  var out={},want={'netname':'Nome da rede','descr':'Descrição','country':'País','inetnum':'Bloco','inet6num':'Bloco','netrange':'Bloco','orgname':'Organização','org-name':'Organização','organization':'Organização','owner':'Titular','ownerid':'ID do titular','responsible':'Responsável','status':'Situação do bloco','nettype':'Tipo de alocação','created':'Criado em','last-modified':'Alterado em','abuse-mailbox':'E-mail de abuso','orgabuseemail':'E-mail de abuso','address':'Endereço','city':'Cidade','phone':'Telefone','tech-c':'Contato técnico','admin-c':'Contato administrativo','owner-c':'Contato do titular','orgtechemail':'E-mail técnico'};
+  var recs=(j&&j.data&&j.data.records)||[];
+  recs.forEach(function(rec){(rec||[]).forEach(function(f){
+    var lab=want[String(f.key||'').toLowerCase()],v=String(f.value||'').trim();
+    if(!lab||!v)return;
+    if(!out[lab])out[lab]=[];
+    if(out[lab].indexOf(v)<0)out[lab].push(v);
+  })});
+  return out;
+}
+function ripeCard(ip,c,rep){
+  c.loading();
+  var B='https://stat.ripe.net/data/',Q='/data.json?resource='+encodeURIComponent(ip),nul=function(){return null};
+  return Promise.all([fetchJSON(B+'prefix-overview'+Q,null,15000).catch(nul),fetchJSON(B+'abuse-contact-finder'+Q,null,15000).catch(nul),fetchJSON(B+'whois'+Q,null,15000).catch(nul)]).then(function(r){
+    var po=r[0]&&r[0].data,ab=r[1]&&r[1].data;
+    if(!po&&!ab&&!(r[2]&&r[2].data))throw new Error('RIPEstat não respondeu');
+    var asns=po&&po.asns?po.asns.map(function(a){return 'AS'+a.asn+(a.holder?' · '+a.holder:'')}):[];
+    var blk=(po&&po.block)||{},who=whoisFields(r[2]);
+    var rows=[['Prefixo anunciado (BGP)',po&&po.resource],['Anunciado agora',po?(po.announced?'Sim, há rota ativa na internet':'Não, sem rota BGP ativa neste momento'):''],['ASN (rede de origem)',asns],['Bloco alocado',blk.resource],['Descrição do bloco',blk.desc],['Registro regional (RIR)',ab&&ab.authoritative_rir?String(ab.authoritative_rir).toUpperCase():''],['Contato de abuso',(ab&&ab.abuse_contacts)||[]]];
+    Object.keys(who).forEach(function(k){rows.push([k,who[k].slice(0,4)])});
+    c.rows(rows);
+    c.note('Fonte: RIPEstat (roteamento BGP e whois de todos os registros regionais). Os campos de whois variam conforme o RIR responsável pelo bloco.');
+    rep.bgp={prefixo:po&&po.resource||null,anunciado:po?!!po.announced:null,asns:po&&po.asns||[],bloco:blk.resource||null,rir:ab&&ab.authoritative_rir||null,abuso:(ab&&ab.abuse_contacts)||[],whois:who};
+  }).catch(function(e){rep.bgp=null;c.error('Não foi possível consultar a rota BGP: '+e.message)});
+}
+/* consulta DoH devolvendo o status: só 0 (NOERROR) e 3 (NXDOMAIN) valem; SERVFAIL e afins ficam como não verificável */
+function dnsRaw(name){
+  var q='name='+encodeURIComponent(name)+'&type=A',h={headers:{Accept:'application/dns-json'}};
+  return anyOk([
+    function(){return fetchJSON('https://cloudflare-dns.com/dns-query?'+q,h,3500)},
+    function(){return fetchJSON('https://dns.google/resolve?'+q,h,3500)}
+  ]);
+}
+var DNSBL=[['Spamhaus ZEN','zen.spamhaus.org'],['SpamCop','bl.spamcop.net'],['DroneBL','dnsbl.dronebl.org'],['PSBL','psbl.surriel.com'],['UCEPROTECT nível 1','dnsbl-1.uceprotect.net'],['Manitu (NiX Spam)','ix.dnsbl.manitu.net'],['s5h.net','all.s5h.net'],['SpamRATS','all.spamrats.com'],['GBUdb Truncate','truncate.gbudb.net']];
+function dnsblCard(ip,c,rep){
+  if(!/^\d+\.\d+\.\d+\.\d+$/.test(ip)){
+    c.rows([['Listas DNSBL','Consulta automática disponível só para IPv4']]);
+    c.note('As principais listas de bloqueio de spam são indexadas por IPv4. Para IPv6 use os links de reputação do card Mais fontes sobre o IP.');
+    rep.dnsbl=null;return Promise.resolve();
+  }
+  c.loading();
+  var rv=ip.split('.').reverse().join('.');
+  return Promise.all(DNSBL.map(function(z){
+    return dnsRaw(rv+'.'+z[1]).then(function(d){
+      if(d.Status!==0&&d.Status!==3)return{n:z[0],s:'un'};
+      var a=(d.Answer||[]).filter(function(x){return x.type===1}).map(function(x){return String(x.data)});
+      if(a.some(function(x){return /^127\.255\.255\./.test(x)}))return{n:z[0],s:'un'};
+      var bad=a.filter(function(x){return /^127\./.test(x)});
+      return bad.length?{n:z[0],s:'listed',code:bad.join(', ')}:{n:z[0],s:'clean'};
+    }).catch(function(){return{n:z[0],s:'un'}});
+  })).then(function(r){
+    var li=r.filter(function(x){return x.s==='listed'}),cl=r.filter(function(x){return x.s==='clean'}),un=r.filter(function(x){return x.s==='un'});
+    if(un.length===r.length)throw new Error('as listas não responderam');
+    c.rows([['Resumo',li.length?'Listado em '+li.length+' de '+(r.length-un.length)+' listas consultadas':'Não consta em nenhuma das '+(r.length-un.length)+' listas que responderam'],['Em lista de bloqueio',li.map(function(x){return x.n+' ('+x.code+')'})],['Fora de lista',cl.map(function(x){return x.n})],['Não verificável agora',un.map(function(x){return x.n})]]);
+    c.note('DNSBL indica IPs associados a spam ou abuso. IPs residenciais dinâmicos costumam ser listados de forma preventiva. O Spamhaus recusa resolvers públicos com frequência, por isso pode aparecer como não verificável.');
+    rep.dnsbl={listado:li,limpo:cl.map(function(x){return x.n}),naoVerificado:un.map(function(x){return x.n})};
+  }).catch(function(e){rep.dnsbl=null;c.error('Não foi possível consultar as listas de bloqueio: '+e.message)});
+}
+function ipIntelCard(ip,c,rep){
+  c.loading();
+  return workerIp(ip).then(function(j){
+    if(!j)throw new Error('Worker não configurado');
+    var gn=j.greynoise,fl=j.flags,ot=j.otx,tor=j.tor,CL={malicious:'Malicioso',benign:'Benigno',unknown:'Desconhecido'},yn=function(v){return v?'Sim':'Não'};
+    var pd=(j.passiveDns||[]).slice(0,60).map(function(x){return x.host+(x.last?' ('+fmtDate(x.last)+')':'')}),rv=(j.reverseIp||[]).slice(0,60);
+    c.rows([
+      ['Nó de saída Tor',tor?(tor.exit?'Sim, é um nó de saída da rede Tor':'Não consta na lista pública de saídas'):''],
+      ['Proxy / VPN (ip-api)',fl?yn(fl.proxy):''],['Hospedagem / datacenter',fl?yn(fl.hosting):''],['Rede móvel',fl?yn(fl.mobile):''],
+      ['Hostname reverso',(j.geo&&j.geo.hostname)||''],
+      ['Varredura em massa (GreyNoise)',gn?(gn.noise?'Sim, este IP foi visto varrendo a internet':'Não visto como ruído de internet'):''],
+      ['Serviço benigno conhecido (RIOT)',gn&&gn.riot?'Sim'+(gn.name?', '+gn.name:''):''],
+      ['Classificação GreyNoise',gn&&gn.classification?(CL[gn.classification]||gn.classification):''],
+      ['Visto por último (GreyNoise)',gn&&gn.lastSeen||''],
+      ['Pulsos de ameaça (AlienVault OTX)',ot&&ot.pulses!=null?String(ot.pulses):''],
+      ['Domínios que já apontaram para este IP (DNS passivo, data do último registro)',pd],
+      ['Domínios hospedados neste IP agora (reverse IP)',rv]
+    ]);
+    if((j.passiveDns||[]).length>60||(j.reverseIp||[]).length>60)c.note('Mostrando até 60 domínios por lista. O JSON traz a lista completa.');
+    c.note('Fontes: '+((j.sources||[]).join(', ')||'nenhuma respondeu')+'. Em IPs de CDN ou hospedagem compartilhada a lista de domínios pode ser enorme e não indica relação entre eles.');
+    rep.reputacao=j;
+  }).catch(function(e){
+    rep.reputacao=null;
+    c.error(e.message==='404'?'O Worker publicado ainda não tem a rota /ip. Atualize o Worker com o worker.js corrigido (rota /ip) e faça o Deploy.':'Não foi possível consultar a reputação do IP: '+e.message);
+  });
+}
+function ipLinksCard(ip,c){
+  var e=encodeURIComponent(ip).replace(/%3A/g,':'),v4=/^\d+\.\d+\.\d+\.\d+$/.test(ip),L=[
+    ['Shodan','https://www.shodan.io/host/'+e,'fa-solid fa-eye'],
+    ['Censys','https://search.censys.io/hosts/'+e,'fa-solid fa-satellite-dish'],
+    ['GreyNoise','https://viz.greynoise.io/ip/'+e,'fa-solid fa-wave-square'],
+    ['AbuseIPDB','https://www.abuseipdb.com/check/'+e,'fa-solid fa-shield-halved'],
+    ['VirusTotal','https://www.virustotal.com/gui/ip-address/'+e,'fa-solid fa-virus'],
+    ['AlienVault OTX','https://otx.alienvault.com/indicator/ip/'+e,'fa-solid fa-user-secret'],
+    ['IBM X-Force','https://exchange.xforce.ibmcloud.com/ip/'+e,'fa-solid fa-shield-virus'],
+    ['Cisco Talos','https://talosintelligence.com/reputation_center/lookup?search='+e,'fa-solid fa-ban'],
+    ['IPinfo','https://ipinfo.io/'+e,'fa-solid fa-circle-info'],
+    ['BGP (bgp.he.net)','https://bgp.he.net/ip/'+e,'fa-solid fa-network-wired'],
+    ['Robtex','https://www.robtex.com/ip-lookup/'+e,'fa-solid fa-sitemap'],
+    ['urlscan.io','https://urlscan.io/search/#ip%3A%22'+e+'%22','fa-solid fa-camera'],
+    ['Spur','https://spur.us/context/'+e,'fa-solid fa-mask'],
+    ['ARIN (RDAP)','https://search.arin.net/rdap/?query='+e,'fa-solid fa-id-card'],
+    ['LACNIC','https://lacnic.net/cgi-bin/lacnic/whois?query='+e,'fa-solid fa-id-card'],
+    ['RIPE NCC','https://apps.db.ripe.net/db-web-ui/query?searchtext='+e,'fa-solid fa-id-card'],
+    ['APNIC','https://wq.apnic.net/static/search.html?query='+e,'fa-solid fa-id-card'],
+    ['Registro.br (blocos .br)','https://registro.br/tecnologia/ferramentas/whois/?search='+e,'fa-solid fa-flag'],
+    ['Google (menções)','https://www.google.com/search?q=%22'+e+'%22','fa-brands fa-google'],
+    ['Bing (menções)','https://www.bing.com/search?q=%22'+e+'%22','fa-solid fa-magnifying-glass']
+  ];
+  if(v4)L.splice(4,0,['MXToolbox (blacklists)','https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a'+e+'&run=toolpage','fa-solid fa-list-check']);
+  c.links(L);
+  return Promise.resolve();
+}
+
+var go=$('go'),toastT=null;
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},1800)}
+function run(t){
+  var my=++tok,rep={alvo:t.value,tipo:t.type,consultadoEm:new Date().toISOString()};
+  report=rep;current=t;grid.textContent='';
+  go.disabled=true;go.textContent='Pesquisando…';box.classList.add('busy');
+  try{history.replaceState(null,'','?q='+encodeURIComponent(String(input.value).trim()))}catch(e){}
+  var res=$('results');res.classList.add('show');$('target').textContent=t.label+': '+(t.type==='cnpj'?fmtCnpj(t.value):t.value);
+  var jobs=[];
+  try{
+  if(t.type==='domain'){jobs=[rdapDomain(t.value,card('Registro (RDAP)','fa-id-card'),rep,'rdap'),dnsCard(t.value,card('Registros DNS','fa-diagram-project'),rep),hostCard(t.value,card('Hospedagem','fa-cloud'),rep),waybackCard(t.value,card('Histórico na web (Internet Archive)','fa-clock-rotate-left'),rep),subCard(t.value,card('Subdomínios e certificados','fa-sitemap'),rep),moreCard(t.value,card('Mais fontes sobre o domínio','fa-arrow-up-right-from-square'))];jobs=jobs.filter(function(j,i){return i!==4})}
+  else if(t.type==='ip'){var ipi=ipInfo(t.value);jobs=[ipClassCard(t.value,card('Classificação do endereço','fa-circle-info'),rep)];if(ipi&&ipi.pub){jobs.push(ipCard(t.value,card('Geolocalização e rede','fa-location-dot'),rep),ripeCard(t.value,card('Rota BGP, ASN e registro (RIPEstat)','fa-network-wired'),rep),internetCard(t.value,card('Exposição e DNS reverso','fa-shield-halved'),rep),dnsblCard(t.value,card('Listas de bloqueio (DNSBL)','fa-ban'),rep),ipIntelCard(t.value,card('Reputação, Tor e domínios ligados','fa-user-secret'),rep),ipLinksCard(t.value,card('Mais fontes sobre o IP','fa-arrow-up-right-from-square')))}}
+  else if(t.type==='email'){var dm=t.value.split('@')[1];var scd=card('Resumo e risco','fa-gauge-high');var p1=emailCard(t.value,card('Análise do e-mail','fa-envelope'),rep),p2=emailPresence(t.value,card('Presença pública','fa-user-check'),rep),acd=card('Onde está cadastrado','fa-address-card'),p3=breachCard(t.value,card('Vazamentos conhecidos','fa-triangle-exclamation'),rep),p4=stealerCard(t.value,card('Infostealers (logs de malware)','fa-bug'),rep),p5=FREEMAIL.indexOf(dm)>-1?Promise.resolve():rdapDomain(dm,card('Domínio do e-mail: '+dm,'fa-id-card'),rep,'rdapDominio');var ub=t.value.split('@')[0].split('+')[0],sub={},p6=/^[a-z0-9._-]{2,40}$/i.test(ub)&&ROLEMAIL.indexOf(ub.toLowerCase())<0?userSearch(ub,card('Perfis com o usuário @'+ub,'fa-users'),sub):Promise.resolve();rep.perfisDoUsuario=sub;var pe=[p1,p2,p3,p4,p5];jobs=pe.concat([accountsCard(t.value,acd,rep,[p2,p3]),summaryCard(t.value,scd,rep,pe)])}
+  else if(t.type==='cnpj'){jobs=[cnpjFull(t.value,card('Empresa (CNPJ)','fa-building'),rep)]}
+  else if(t.type==='user'){jobs=[userSearch(t.value,card('Perfis encontrados','fa-circle-check'),rep)]}
+  else if(t.type==='phone'){jobs=[phoneCard(t.value,card('Análise do telefone','fa-phone'),rep)]}
+  }catch(err){jobs=[];card('Erro','fa-triangle-exclamation').error('Falha inesperada ao pesquisar. Tente novamente.')}
+  Promise.all(jobs.map(function(j){return cap(j,20000)})).then(function(){if(my===tok){go.disabled=false;try{afterRun()}catch(x){}go.textContent='Pesquisar';box.classList.remove('busy');var vis=[].slice.call(grid.children).filter(function(x){return x.style.display!=='none'}).length;if(!vis){var em=el('div','card');em.appendChild(el('p','note','Nenhum dado público disponível para este alvo no momento.'));grid.appendChild(em)}}});
+  setTimeout(function(){res.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'})},60);
+}
+var input=$('q'),box=$('box');
+input.addEventListener('input',function(){
+  box.classList.remove('bad');var t=detect(input.value);
+  $('detected').textContent=t?'Tipo identificado: '+t.label+((t.type==='domain'&&!/^[a-z]+:\/\//i.test(input.value.trim()))?' (para tratar como usuário, comece com @)':'')+(t.note&&t.note.length?' · '+t.note.join('; '):''):'';
+});
+$('form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var t=detect(input.value);
+  if(!t){box.classList.add('bad');$('detected').textContent=input.value.trim()?(/^\d{14}$/.test(input.value.replace(/[.\/\s-]/g,''))?'CNPJ inválido: os dígitos verificadores não conferem. Confira o número.':'Formato não reconhecido. Use um domínio, IP, e-mail, @usuário, telefone ou CNPJ.'):'Digite um alvo para pesquisar.';input.focus();return}
+  if(isBlocked(t)){box.classList.add('bad');$('detected').textContent='Pesquisa bloqueada para este alvo.';input.focus();return}
+  run(t);
+});
+function copyText(s,done0){var done=function(ok){toast(ok?'Copiado para a área de transferência':'Não foi possível copiar');done0(ok)};
+  function fallback(){var ta=document.createElement('textarea');ta.value=s;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();done(ok)}
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(s).then(function(){done(true)},fallback)}else fallback();
+}
+$('copy').addEventListener('click',function(){
+  var b=$('copy');
+  copyText(JSON.stringify(report,null,2),function(ok){b.textContent=ok?'Copiado!':'Use Baixar JSON';setTimeout(function(){b.innerHTML='<i class="fa-regular fa-copy"></i> Copiar JSON'},1800)});
+});
+$('dl').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='osint-av2-'+(current?current.value.replace(/[^a-z0-9.-]/gi,'_'):'relatorio')+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);
+});
+
+var sp=false;
+grid.addEventListener('pointermove',function(e){
+  if(sp||!e.target||!e.target.closest)return;var c=e.target.closest('.card');if(!c)return;sp=true;
+  requestAnimationFrame(function(){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');sp=false});
+});
+$('chips').addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.chip');if(!b)return;
+  input.value=b.getAttribute('data-q');input.dispatchEvent(new Event('input'));
+  var f=$('form');if(f.requestSubmit)f.requestSubmit();else f.dispatchEvent(new Event('submit',{cancelable:true}));
+});
+var tick=false;
+function onScroll(){
+  var y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+  $('prog').style.transform='scaleX('+(h>0?Math.min(y/h,1):0)+')';
+  $('toTop').classList.toggle('show',y>600);
+  $('header').classList.toggle('scrolled',y>10);
+  tick=false;
+}
+addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(onScroll)}},{passive:true});
+onScroll();
+$('toTop').addEventListener('click',function(){scrollTo({top:0,behavior:'smooth'})});
+var rv=[].slice.call(document.querySelectorAll('.reveal'));
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});rv.forEach(function(r,i){r.style.transitionDelay=(i%5)*70+'ms';io.observe(r)})}else{rv.forEach(function(r){r.classList.add('in')})}
+
+/* ===== Laboratório: grafo, comparação, monitoramento e alertas ===== */
+var LS_INV='osintav2.inv',LS_MON='osintav2.mon',pendingMon=null,monQueue=[];
+function lsGet(k){try{var v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch(e){return[]}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){toast('Não foi possível salvar (armazenamento cheio ou bloqueado)');return false}}
+var SKIPK=/(consultadoEm|agora|hora|timestamp|^ts$)/i;
+function flat(o,p,out){out=out||{};p=p||'';
+  if(o==null||typeof o==='function')return out;
+  if(Array.isArray(o)){o.forEach(function(v,i){
+    if(v!==null&&typeof v==='object'){var id=v.plataforma||v.nome||v.title||v.name||v.usuario||v.asn||(v.papel&&String(v.papel))||i;flat(v,p+'['+id+']',out)}
+    else out[p+'#'+String(v).slice(0,120)]='presente'})}
+  else if(typeof o==='object'){Object.keys(o).forEach(function(k){if(SKIPK.test(k))return;flat(o[k],p?p+'.'+k:k,out)})}
+  else out[p]=String(o).slice(0,200);
+  return out}
+function diffFlat(a,b){var ch=[];
+  Object.keys(b).forEach(function(k){if(!(k in a))ch.push({k:k,t:'novo',a:'',b:b[k]});else if(a[k]!==b[k])ch.push({k:k,t:'alterado',a:a[k],b:b[k]})});
+  Object.keys(a).forEach(function(k){if(!(k in b))ch.push({k:k,t:'removido',a:a[k],b:''})});return ch}
+function labK(k){var i=k.indexOf('#');return i>-1?k.slice(0,i).replace(/\./g,' › ')+': '+k.slice(i+1):k.replace(/\./g,' › ')}
+var INFRA=/^(dns|rdap|rdapDominio|hospedagem|bgp|ip|dnsbl)/;
+var BDC={novo:'#1a7f37',removido:'#b3261e',alterado:'#9a6700'};
+function diffView(ch,box,common){
+  box.textContent='';
+  if(!ch.length){box.appendChild(el('p','note','Nenhuma diferença encontrada.'))}
+  ch.slice(0,300).forEach(function(c){var r=el('div','df'),b=el('span','bd',c.t.toUpperCase());b.style.background=BDC[c.t];r.appendChild(b);
+    if(INFRA.test(c.k)){var f=el('span','bd','INFRA');f.style.background='#444';r.appendChild(f)}
+    r.appendChild(document.createTextNode(labK(c.k)));
+    if(c.t==='alterado'){var d=el('div',null,c.a+'  →  '+c.b);d.style.color='var(--ink-2)';r.appendChild(d)}
+    box.appendChild(r)});
+  if(ch.length>300)box.appendChild(el('p','note','Mostrando 300 de '+ch.length+' diferenças.'));
+  if(common&&common.length){var h=el('p','note','Pontos em comum ('+common.length+')');h.style.cssText='margin:14px 0 4px;font-weight:600;color:var(--ink)';box.appendChild(h);
+    common.slice(0,100).forEach(function(k){box.appendChild(el('div','df',labK(k)))})}}
+function commonKeys(a,b){return Object.keys(a).filter(function(k){return k in b&&a[k]===b[k]&&!/^(alvo|tipo)$/.test(k)})}
+function curFlat(){return flat(report||{})}
+
+/* ----- investigações salvas ----- */
+function invList(){return lsGet(LS_INV)}
+function saveInv(){
+  if(!current||!report||!report.alvo){toast('Faça uma pesquisa primeiro');return}
+  var L=invList();L.unshift({id:Date.now().toString(36),alvo:current.value,tipo:current.type,quando:new Date().toISOString(),rep:JSON.parse(JSON.stringify(report))});
+  L=L.slice(0,30);if(lsSet(LS_INV,L)){toast('Investigação salva');renderLab()}}
+function repOf(id){if(id==='cur')return report;var f=invList().filter(function(x){return x.id===id})[0];return f&&f.rep}
+function fillSel(sel){var v=sel.value;sel.textContent='';var o=el('option',null,'Resultado atual'+(current?' ('+current.value+')':''));o.value='cur';sel.appendChild(o);
+  invList().forEach(function(x){var op=el('option',null,x.alvo+' · '+new Date(x.quando).toLocaleString('pt-BR'));op.value=x.id;sel.appendChild(op)});
+  if(v&&[].some.call(sel.options,function(o){return o.value===v}))sel.value=v}
+function renderInv(){var box=$('inv-list');box.textContent='';var L=invList();
+  if(!L.length)box.appendChild(el('p','note','Nenhuma investigação salva. Faça uma pesquisa e clique em Salvar.'));
+  L.forEach(function(x){var r=el('div','it'),t=el('div',null,x.alvo+' · '+x.tipo+' · '+new Date(x.quando).toLocaleString('pt-BR'));
+    var b=el('div');var d=el('button','btn btn-dark','Excluir');d.type='button';d.onclick=function(){lsSet(LS_INV,invList().filter(function(y){return y.id!==x.id}));renderLab()};
+    var g=el('button','btn btn-dark','Grafo');g.type='button';g.style.marginRight='6px';g.onclick=function(){$('gsrc').value=x.id;drawGraph();tab('graph')};
+    b.appendChild(g);b.appendChild(d);r.appendChild(t);r.appendChild(b);box.appendChild(r)})}
+function runCompare(){
+  var A=repOf($('cmpA').value),B=repOf($('cmpB').value),box=$('cmp-out');
+  if(!A||!B){box.textContent='';box.appendChild(el('p','note','Escolha duas investigações (salve ao menos uma).'));return}
+  var fa=flat(A),fb=flat(B);diffView(diffFlat(fa,fb),box,commonKeys(fa,fb))}
+
+/* ----- monitoramento e alertas ----- */
+function monList(){return lsGet(LS_MON)}
+function addMon(){
+  if(!current||!report||!report.alvo){toast('Faça uma pesquisa primeiro');return}
+  var L=monList();if(L.some(function(x){return x.alvo===current.value&&x.tipo===current.type})){toast('Este alvo já está monitorado');return}
+  L.unshift({id:Date.now().toString(36),alvo:current.value,tipo:current.type,criado:new Date().toISOString(),ultimo:new Date().toISOString(),base:curFlat(),alertas:[]});
+  if(lsSet(LS_MON,L)){toast('Alvo adicionado ao monitoramento');renderLab()}}
+function checkMon(id){var m=monList().filter(function(x){return x.id===id})[0];if(!m)return;var t=detect(m.alvo);if(!t){toast('Alvo inválido');return}
+  pendingMon=id;input.value=m.alvo;run(t)}
+function checkAll(){monQueue=monList().map(function(x){return x.id});if(!monQueue.length){toast('Nada para verificar');return}checkMon(monQueue.shift())}
+function afterRun(){
+  if(!pendingMon){renderLab();return}
+  var id=pendingMon;pendingMon=null;var L=monList(),m=L.filter(function(x){return x.id===id})[0];
+  if(m){var nf=curFlat(),ch=diffFlat(m.base,nf);
+    m.ultimo=new Date().toISOString();
+    if(ch.length){m.alertas.unshift({quando:m.ultimo,mudancas:ch.slice(0,200)});m.alertas=m.alertas.slice(0,15);m.base=nf}
+    lsSet(LS_MON,L);toast(ch.length?'Alterações detectadas em '+m.alvo+' ('+ch.length+')':'Sem alterações em '+m.alvo)}
+  renderLab();if(monQueue.length)setTimeout(function(){checkMon(monQueue.shift())},800)}
+function renderMon(){var box=$('mon-list');box.textContent='';var L=monList();
+  if(!L.length)box.appendChild(el('p','note','Nenhum alvo monitorado. Pesquise e clique em Monitorar.'));
+  L.forEach(function(m){var w=el('div');w.style.cssText='border-top:1px solid var(--line);padding:12px 0';
+    var h=el('div','it');h.style.border='0';h.style.padding='0';
+    var n=m.alertas.length&&m.alertas[0].quando===m.ultimo;
+    var tt=el('div',null,m.alvo+' · '+m.tipo+' · verificado em '+new Date(m.ultimo).toLocaleString('pt-BR')+(n?' · ⚠ alterações':''));tt.style.fontWeight='600';
+    var b=el('div');
+    var c=el('button','btn btn-dark','Verificar agora');c.type='button';c.style.marginRight='6px';c.onclick=function(){checkMon(m.id)};
+    var d=el('button','btn btn-dark','Remover');d.type='button';d.onclick=function(){lsSet(LS_MON,monList().filter(function(x){return x.id!==m.id}));renderLab()};
+    b.appendChild(c);b.appendChild(d);h.appendChild(tt);h.appendChild(b);w.appendChild(h);
+    m.alertas.slice(0,3).forEach(function(a){var s=el('p','note','Alerta de '+new Date(a.quando).toLocaleString('pt-BR')+' ('+a.mudancas.length+' mudança(s))');s.style.cssText='margin:10px 0 2px;font-weight:600;color:var(--ink)';w.appendChild(s);var dv=el('div');diffView(a.mudancas.slice(0,20),dv);w.appendChild(dv)});
+    box.appendChild(w)})}
+
+/* ----- grafo ----- */
+var TC={alvo:'#d6a04a',ip:'#2f6fed',ns:'#7a4fd6',mail:'#d6498a',servico:'#16928a',asn:'#e07b24',rede:'#8a6420',org:'#555',pessoa:'#c0392b',email:'#d6498a',perfil:'#2e9e4f',site:'#2f6fed',local:'#888',vazamento:'#b3261e',dominio:'#d6a04a'};
+var TN={alvo:'Alvo',ip:'IP',ns:'Servidor DNS',mail:'E-mail / MX',servico:'Serviço',asn:'ASN',rede:'Prefixo',org:'Organização',pessoa:'Pessoa',email:'E-mail',perfil:'Perfil',site:'Site',local:'Local',vazamento:'Vazamento',dominio:'Domínio'};
+function graphData(r,t){
+  var N={},E=[];
+  function n(label,type){label=String(label==null?'':label).trim();if(!label)return null;var id=type+':'+label.toLowerCase();
+    if(!N[id])N[id]={id:id,full:label,label:label.length>30?label.slice(0,29)+'…':label,type:type,x:0,y:0,vx:0,vy:0,deg:0};return N[id]}
+  function e(a,b){if(!a||!b||a===b)return;E.push({a:a,b:b});a.deg++;b.deg++}
+  function many(hub,arr,type){(arr||[]).forEach(function(v){if(v&&typeof v==='object')return;e(hub,n(String(v).replace(/\.$/,'').replace(/^\d+\s+/,''),type))})}
+  var root=n(t.value,'alvo');root.fix=true;var hub=root;
+  if(t.type==='email'){var dm=n(t.value.split('@')[1],'dominio');e(root,dm);hub=dm}
+  var d=r.dns;if(d){many(hub,d.A,'ip');many(hub,d.AAAA,'ip');many(hub,d.MX,'mail');many(hub,d.NS,'ns');many(hub,d.provedorDns,'servico');many(hub,d.servicosDetectados,'servico')}
+  var h=r.hospedagem;if(h){many(hub,h.ips,'ip');many(hub,h.ipv6,'ip');if(h.geo){var as=n(h.geo.asn,'asn');e(h.ips&&h.ips[0]?n(h.ips[0],'ip'):hub,as);if(h.geo.pais)e(as,n(h.geo.pais,'local'))}}
+  [r.rdap,r.rdapDominio].forEach(function(x){if(!x)return;var rg=n(x.registrador,'org');e(hub,rg);many(hub,x.servidores,'ns');
+    (x.contatos||[]).forEach(function(c){var p=n(c.nome,'pessoa');e(hub,p);if(c.organizacao)e(p,n(c.organizacao,'org'));(c.emails||[]).forEach(function(m){e(p||hub,n(m,'email'))})})});
+  if(r.empresa){var eo=n(r.empresa.razaoSocial,'org');e(hub,eo);(r.empresa.socios||[]).forEach(function(s){e(eo,n(String(s).replace(/\s*\(.*\)$/,''),'pessoa'))})}
+  if(r.cnpj&&r.cnpj.dados){var cj=r.cnpj.dados,co=n(cj.razao_social,'org');e(root,co);(cj.qsa||[]).forEach(function(s){e(co,n(s.nome_socio,'pessoa'))});if(cj.email)e(co,n(cj.email,'email'));if(cj.municipio)e(co,n(cj.municipio+'/'+cj.uf,'local'))}
+  var b=r.bgp;if(b){var rd=n(b.prefixo,'rede');e(hub,rd);(b.asns||[]).forEach(function(a){e(rd,n('AS'+a.asn+(a.holder?' · '+a.holder:''),'asn'))})}
+  (r.verificados||[]).forEach(function(v){if(v.status==='encontrado')e(root,n(v.plataforma,'perfil'))});
+  var c=r.consolidado;if(c){many(root,c.nomes,'pessoa');many(root,c.emails,'email');many(root,c.sites,'site');many(root,c.localizacoes,'local');many(root,c.empresas,'org')}
+  var v=r.vazamentos;if(v&&v.vazamentos)v.vazamentos.slice(0,30).forEach(function(x){e(root,n(x.title||x.name,'vazamento'))});
+  var tel=r.telefone;if(tel){if(tel.uf)e(root,n(tel.uf,'local'));if(tel.pais)e(root,n(tel.pais,'local'))}
+  var ids=Object.keys(N),nodes=ids.map(function(i){return N[i]}),seen={},edges=E.filter(function(x){var k=x.a.id+'|'+x.b.id;if(seen[k])return false;seen[k]=1;return true});
+  nodes.forEach(function(x,i){var an=i/nodes.length*6.283;x.x=Math.cos(an)*(x===root?0:160);x.y=Math.sin(an)*(x===root?0:160)});
+  return{nodes:nodes,edges:edges,root:root}}
+function layout(G,steps){var ns=G.nodes,k,i,j;
+  for(k=0;k<steps;k++){var cool=1-k/steps*.8;
+    for(i=0;i<ns.length;i++)for(j=i+1;j<ns.length;j++){var a=ns[i],b=ns[j],dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy+.5,d=Math.sqrt(d2),f=3600/d2;dx/=d;dy/=d;a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f}
+    G.edges.forEach(function(e){var a=e.a,b=e.b,dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)+.01,f=(d-95)*.03;dx/=d;dy/=d;a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f});
+    ns.forEach(function(x){x.vx-=x.x*.004;x.vy-=x.y*.004;if(!x.fix){x.x+=Math.max(-18,Math.min(18,x.vx))*cool;x.y+=Math.max(-18,Math.min(18,x.vy))*cool}x.vx*=.55;x.vy*=.55})}}
+var GS=null,NS_='http://www.w3.org/2000/svg';
+function sv(tag,at){var e=document.createElementNS(NS_,tag);for(var k in at)e.setAttribute(k,at[k]);return e}
+function drawGraph(){
+  var svg=$('gsvg'),r=repOf($('gsrc').value),info=$('ginfo');svg.textContent='';
+  if(!r||!r.alvo){info.textContent='Faça uma pesquisa (domínio, IP, e-mail, usuário, telefone ou CNPJ) e depois clique em Grafo.';return}
+  var t=detect(r.alvo)||{type:r.tipo,value:r.alvo};
+  var G=graphData(r,t);GS=G;
+  if(G.nodes.length<2){info.textContent='Ainda não há conexões suficientes para desenhar. Aguarde a pesquisa terminar ou tente outro alvo.';return}
+  layout(G,320);
+  var gE=sv('g'),gN=sv('g');svg.appendChild(gE);svg.appendChild(gN);
+  G.edges.forEach(function(e){e.el=sv('line',{stroke:'#bbb','stroke-width':1.2});gE.appendChild(e.el)});
+  G.nodes.forEach(function(x){var rad=6+Math.min(x.deg*1.3,10),g=sv('g',{style:'cursor:pointer'});g.dataset.id=x.id;
+    var c=sv('circle',{r:rad,fill:TC[x.type]||'#888',stroke:'#fff','stroke-width':2});g.appendChild(c);
+    var tx=sv('text',{y:rad+12,'text-anchor':'middle','font-size':'10.5',fill:'#222'});tx.textContent=x.label;tx.style.pointerEvents='none';g.appendChild(tx);
+    var tt=sv('title');tt.textContent=(TN[x.type]||x.type)+': '+x.full;g.appendChild(tt);x.el=g;gN.appendChild(g)});
+  paintG();fitG();
+  info.textContent=G.nodes.length+' nós · '+G.edges.length+' conexões. Arraste nós, role para zoom, clique para destacar vizinhos, duplo clique para pesquisar o item.';
+  var lg=$('glegend');lg.textContent='';var used={};G.nodes.forEach(function(x){used[x.type]=1});
+  Object.keys(used).forEach(function(k){var s=el('span');var i=el('i');i.style.background=TC[k]||'#888';s.appendChild(i);s.appendChild(document.createTextNode(TN[k]||k));lg.appendChild(s)})}
+function paintG(){GS.edges.forEach(function(e){e.el.setAttribute('x1',e.a.x);e.el.setAttribute('y1',e.a.y);e.el.setAttribute('x2',e.b.x);e.el.setAttribute('y2',e.b.y)});
+  GS.nodes.forEach(function(x){x.el.setAttribute('transform','translate('+x.x+','+x.y+')')})}
+var VB={x:-300,y:-260,w:600,h:520};
+function setVB(){$('gsvg').setAttribute('viewBox',VB.x+' '+VB.y+' '+VB.w+' '+VB.h)}
+function fitG(){var a=1e9,b=1e9,c=-1e9,d=-1e9;GS.nodes.forEach(function(x){a=Math.min(a,x.x);b=Math.min(b,x.y);c=Math.max(c,x.x);d=Math.max(d,x.y)});
+  var w=Math.max(c-a+140,300),h=Math.max(d-b+120,260),ar=$('gsvg').clientWidth/Math.max($('gsvg').clientHeight,1)||1.6;
+  if(w/h<ar)w=h*ar;else h=w/ar;VB={x:(a+c)/2-w/2,y:(b+d)/2-h/2,w:w,h:h};setVB()}
+function ptG(ev){var s=$('gsvg'),p=s.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(s.getScreenCTM().inverse())}
+function focusG(id){var nb={};nb[id]=1;GS.edges.forEach(function(e){if(e.a.id===id)nb[e.b.id]=1;if(e.b.id===id)nb[e.a.id]=1});
+  GS.nodes.forEach(function(x){x.el.style.opacity=!id||nb[x.id]?1:.15});GS.edges.forEach(function(e){e.el.style.opacity=!id||(nb[e.a.id]&&nb[e.b.id])?1:.1})}
+(function(){var svg=$('gsvg'),drag=null,pan=null,moved=false;
+  svg.addEventListener('pointerdown',function(ev){if(!GS)return;moved=false;var g=ev.target.closest&&ev.target.closest('g[data-id]');
+    if(g){drag=GS.nodes.filter(function(x){return x.id===g.dataset.id})[0]}else{pan={x:ev.clientX,y:ev.clientY,vx:VB.x,vy:VB.y}}svg.setPointerCapture(ev.pointerId)});
+  svg.addEventListener('pointermove',function(ev){if(drag){moved=true;var p=ptG(ev);drag.x=p.x;drag.y=p.y;drag.fix=true;layout(GS,4);drag.x=p.x;drag.y=p.y;paintG()}
+    else if(pan){var k=VB.w/svg.clientWidth;VB.x=pan.vx-(ev.clientX-pan.x)*k;VB.y=pan.vy-(ev.clientY-pan.y)*k;setVB()}});
+  svg.addEventListener('pointerup',function(){if(drag&&!moved){focusG(drag.id);$('ginfo').textContent=(TN[drag.type]||drag.type)+': '+drag.full}else if(!drag&&pan&&!moved){}drag=null;pan=null});
+  svg.addEventListener('dblclick',function(ev){var g=ev.target.closest&&ev.target.closest('g[data-id]');if(!g||!GS)return;var x=GS.nodes.filter(function(n){return n.id===g.dataset.id})[0];
+    var tt=detect(x.full);if(tt&&!isBlocked(tt)){input.value=x.full;$('gsrc').value='cur';run(tt)}else toast('Este item não pode ser pesquisado diretamente')});
+  svg.addEventListener('click',function(ev){if(!ev.target.closest('g[data-id]')&&GS&&!moved)focusG(null)});
+  svg.addEventListener('wheel',function(ev){ev.preventDefault();var p=ptG(ev),f=ev.deltaY>0?1.12:.89;VB={x:p.x-(p.x-VB.x)*f,y:p.y-(p.y-VB.y)*f,w:VB.w*f,h:VB.h*f};setVB()},{passive:false})})();
+function exportSVG(){if(!GS){toast('Gere o grafo primeiro');return}
+  var c=$('gsvg').cloneNode(true);c.setAttribute('xmlns',NS_);c.setAttribute('width','1200');c.setAttribute('height','900');c.style.background='#fff';
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c.outerHTML],{type:'image/svg+xml'}));a.download='grafo-osint-av2.svg';document.body.appendChild(a);a.click();a.remove()}
+
+/* ----- abas e render geral ----- */
+function tab(n){[].forEach.call(document.querySelectorAll('[data-tab]'),function(b){b.classList.toggle('on',b.dataset.tab===n)});
+  [].forEach.call(document.querySelectorAll('.lab-panel'),function(p){p.classList.toggle('on',p.id==='p-'+n)});if(n==='graph'&&GS)setTimeout(fitG,30)}
+function renderLab(){['gsrc','cmpA','cmpB'].forEach(function(i){fillSel($(i))});renderInv();renderMon()}
+[].forEach.call(document.querySelectorAll('[data-tab]'),function(b){b.addEventListener('click',function(){tab(b.dataset.tab)})});
+$('sv').addEventListener('click',saveInv);$('mn').addEventListener('click',function(){addMon();tab('mon');$('lab').scrollIntoView({behavior:'smooth'})});
+$('gr').addEventListener('click',function(){renderLab();$('gsrc').value='cur';drawGraph();tab('graph');$('lab').scrollIntoView({behavior:'smooth'})});
+$('gdraw').addEventListener('click',drawGraph);$('gsvgx').addEventListener('click',exportSVG);$('gfit').addEventListener('click',function(){if(GS)fitG()});
+$('cmpgo').addEventListener('click',runCompare);$('monall').addEventListener('click',checkAll);
+$('monexp').addEventListener('click',function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(monList(),null,2)],{type:'application/json'}));a.download='monitoramento-osint-av2.json';document.body.appendChild(a);a.click();a.remove()});
+renderLab();
+
+/* link direto: index.html?q=exemplo.com */
+try{var qp=new URLSearchParams(location.search).get('q');if(qp){input.value=qp;input.dispatchEvent(new Event('input'));var t0=detect(qp);if(t0&&!isBlocked(t0))run(t0)}}catch(e){}
+})();
+</script>
+</body>
+</html>
