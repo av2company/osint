@@ -1080,6 +1080,46 @@ function moreCard(d,c){
   c.links(L);
   return Promise.resolve();
 }
+function crossCard(d,c,rep){
+  c.loading();
+  if(!OSINT_API){c.error('Configure OSINT_API com a URL do seu Worker para cruzar dados do domínio.');return Promise.resolve()}
+  var base=OSINT_API.replace(/\/$/,'');
+  var pSub=fetchJSON(base+'/domain?d='+encodeURIComponent(d),null,15000).catch(function(){return null});
+  var pRoot=dns(d,'A').catch(function(){return[]});
+  var pDm=dns('_dmarc.'+d,'TXT').catch(function(){return[]});
+  return Promise.all([pSub,pRoot,pDm]).then(function(r){
+    var sj=r[0],rootIps=r[1]||[],dm=r[2]||[];
+    var subs=sj&&sj.subdomains?sj.subdomains.filter(function(x){return x!==d&&x!=='www.'+d}).slice(0,12):[];
+    return Promise.all(subs.map(function(n){return dns(n,'A').catch(function(){return[]}).then(function(ips){return{nome:n,ips:ips.filter(function(i){return !isPrivate(i)})}})})).then(function(sl){
+      var all={};rootIps.forEach(function(i){all[i]=1});sl.forEach(function(x){x.ips.forEach(function(i){all[i]=1})});
+      var top=Object.keys(all).filter(function(i){return !isPrivate(i)&&i.indexOf(':')<0}).slice(0,4);
+      return Promise.all(top.map(function(ip){return workerIp(ip).catch(function(){return null}).then(function(j){return{ip:ip,j:j}})})).then(function(il){
+        var ips=il.map(function(x){var j=x.j||{},g=j.geo||{},rv=(j.reverseIp||[]).filter(function(h){return h!==d&&h.slice(-d.length-1)!=='.'+d}),pd=(j.passiveDns||[]).map(function(y){return y.host}).filter(function(h){return h&&h!==d&&h.slice(-d.length-1)!=='.'+d});
+          var dom=[];rv.concat(pd).forEach(function(h){if(dom.indexOf(h)<0)dom.push(h)});
+          var org=g.org||g.isp||'',weak=/cloudflare|akamai|fastly|cloudfront|incapsula|sucuri/i.test(org)||rv.length>50;
+          return{ip:x.ip,asn:g.asn||'',provedor:org,pais:g.pais||'',dominios:dom.slice(0,30),totalDominios:dom.length,fraca:weak}});
+        var emails=[];dm.forEach(function(t){(String(t).match(/mailto:([^;,\s]+)/gi)||[]).forEach(function(m){m=m.slice(7).toLowerCase();if(emails.indexOf(m)<0)emails.push(m)})});
+        var rd=rep.rdap;if(rd&&rd.contatos)rd.contatos.forEach(function(ct){(ct.emails||[]).forEach(function(m){m=String(m).toLowerCase();if(emails.indexOf(m)<0)emails.push(m)})});
+        var cert=sj?{total:sj.total||0,primeiro:sj.first||'',ultimo:sj.last||'',fonte:sj.source||''}:null;
+        rep.cruzada={subdominios:sl,ips:ips,emails:emails,certificados:cert};
+        c.clear();
+        var assoc=[];ips.forEach(function(x){if(!x.fraca)x.dominios.forEach(function(h){if(assoc.indexOf(h)<0)assoc.push(h)})});
+        c.rows([
+          ['IPs relacionados',ips.map(function(x){return x.ip+(x.provedor?' ('+x.provedor+')':'')})],
+          ['Subdomínios',sj?(sj.totalSubdomains||subs.length)+' encontrados'+(sl.length?' · '+sl.filter(function(x){return x.ips.length}).length+' com IP':''):'Fonte de certificados indisponível'],
+          ['Certificados',cert&&cert.total?cert.total+' emitidos'+(cert.primeiro?' · de '+fmtDate(cert.primeiro)+' a '+fmtDate(cert.ultimo):''):''],
+          ['Provedores / ASNs',ips.map(function(x){return (x.asn||'')+(x.provedor?' · '+x.provedor:'')}).filter(function(v){return v.trim()})],
+          ['E-mails publicados',emails],
+          ['Outros domínios na mesma infraestrutura',assoc.slice(0,20)]
+        ]);
+        if(ips.some(function(x){return x.fraca}))c.note('Alguns IPs pertencem a uma CDN ou hospedagem muito compartilhada (como Cloudflare). Domínios que aparecem neles não têm relação direta com o alvo e ficam com peso baixo no grafo.');
+        c.note('Cruzamento feito com DNS público, certificados (Certificate Transparency), DNS reverso e passivo. Até 12 subdomínios e 4 IPs por pesquisa. Compartilhar IP não prova a mesma titularidade.');
+        var b=el('button','btn btn-dark');b.type='button';b.style.marginTop='12px';b.appendChild(el('i','fa-solid fa-diagram-project'));b.appendChild(document.createTextNode(' Ver no grafo'));
+        b.addEventListener('click',function(){var g=$('gr');if(g)g.click()});c.add(b);
+      });
+    });
+  }).catch(function(e){rep.cruzada=null;c.clear();c.error('Não foi possível cruzar os dados agora: '+((e&&e.message)||'sem resposta'))});
+}
 function hostCard(d,c,rep){
   c.loading();
   return Promise.all([dns(d,'A'),dns(d,'AAAA').catch(function(){return []})]).then(function(rr){
@@ -1696,7 +1736,7 @@ function run(t){
   var res=$('results');res.classList.add('show');$('target').textContent=t.label+': '+(t.type==='cnpj'?fmtCnpj(t.value):t.value);
   var jobs=[];
   try{
-  if(t.type==='domain'){jobs=[rdapDomain(t.value,card('Registro (RDAP)','fa-id-card'),rep,'rdap'),dnsCard(t.value,card('Registros DNS','fa-diagram-project'),rep),hostCard(t.value,card('Hospedagem','fa-cloud'),rep),waybackCard(t.value,card('Histórico na web (Internet Archive)','fa-clock-rotate-left'),rep),subCard(t.value,card('Subdomínios e certificados','fa-sitemap'),rep),moreCard(t.value,card('Mais fontes sobre o domínio','fa-arrow-up-right-from-square'))];jobs=jobs.filter(function(j,i){return i!==4})}
+  if(t.type==='domain'){jobs=[rdapDomain(t.value,card('Registro (RDAP)','fa-id-card'),rep,'rdap'),dnsCard(t.value,card('Registros DNS','fa-diagram-project'),rep),hostCard(t.value,card('Hospedagem','fa-cloud'),rep),waybackCard(t.value,card('Histórico na web (Internet Archive)','fa-clock-rotate-left'),rep),subCard(t.value,card('Subdomínios e certificados','fa-sitemap'),rep),crossCard(t.value,card('Inteligência cruzada','fa-circle-nodes'),rep),moreCard(t.value,card('Mais fontes sobre o domínio','fa-arrow-up-right-from-square'))];jobs=jobs.filter(function(j,i){return i!==4})}
   else if(t.type==='ip'){var ipi=ipInfo(t.value);jobs=[ipClassCard(t.value,card('Classificação do endereço','fa-circle-info'),rep)];if(ipi&&ipi.pub){jobs.push(ipCard(t.value,card('Geolocalização e rede','fa-location-dot'),rep),ripeCard(t.value,card('Rota BGP, ASN e registro (RIPEstat)','fa-network-wired'),rep),internetCard(t.value,card('Exposição e DNS reverso','fa-shield-halved'),rep),dnsblCard(t.value,card('Listas de bloqueio (DNSBL)','fa-ban'),rep),ipIntelCard(t.value,card('Reputação, Tor e domínios ligados','fa-user-secret'),rep),ipLinksCard(t.value,card('Mais fontes sobre o IP','fa-arrow-up-right-from-square')))}}
   else if(t.type==='email'){var dm=t.value.split('@')[1];var scd=card('Resumo e risco','fa-gauge-high');var p1=emailCard(t.value,card('Análise do e-mail','fa-envelope'),rep),p2=emailPresence(t.value,card('Presença pública','fa-user-check'),rep),acd=card('Onde está cadastrado','fa-address-card'),p3=breachCard(t.value,card('Vazamentos conhecidos','fa-triangle-exclamation'),rep),p4=stealerCard(t.value,card('Infostealers (logs de malware)','fa-bug'),rep),p5=FREEMAIL.indexOf(dm)>-1?Promise.resolve():rdapDomain(dm,card('Domínio do e-mail: '+dm,'fa-id-card'),rep,'rdapDominio');var ub=t.value.split('@')[0].split('+')[0],sub={},p6=/^[a-z0-9._-]{2,40}$/i.test(ub)&&ROLEMAIL.indexOf(ub.toLowerCase())<0?userSearch(ub,card('Perfis com o usuário @'+ub,'fa-users'),sub):Promise.resolve();rep.perfisDoUsuario=sub;var pe=[p1,p2,p3,p4,p5];jobs=pe.concat([accountsCard(t.value,acd,rep,[p2,p3]),summaryCard(t.value,scd,rep,pe)])}
   else if(t.type==='cnpj'){jobs=[cnpjFull(t.value,card('Empresa (CNPJ)','fa-building'),rep)]}
@@ -1843,8 +1883,8 @@ function renderMon(){var box=$('mon-list');box.textContent='';var L=monList();
     box.appendChild(w)})}
 
 /* ----- grafo ----- */
-var TC={alvo:'#d6a04a',ip:'#2f6fed',ns:'#7a4fd6',mail:'#d6498a',servico:'#16928a',asn:'#e07b24',rede:'#8a6420',org:'#555',pessoa:'#c0392b',email:'#d6498a',perfil:'#2e9e4f',site:'#2f6fed',local:'#888',vazamento:'#b3261e',dominio:'#d6a04a'};
-var TN={alvo:'Alvo',ip:'IP',ns:'Servidor DNS',mail:'E-mail / MX',servico:'Serviço',asn:'ASN',rede:'Prefixo',org:'Organização',pessoa:'Pessoa',email:'E-mail',perfil:'Perfil',site:'Site',local:'Local',vazamento:'Vazamento',dominio:'Domínio'};
+var TC={alvo:'#d6a04a',ip:'#2f6fed',ns:'#7a4fd6',mail:'#d6498a',servico:'#16928a',asn:'#e07b24',rede:'#8a6420',org:'#555',pessoa:'#c0392b',email:'#d6498a',perfil:'#2e9e4f',site:'#2f6fed',local:'#888',vazamento:'#b3261e',dominio:'#d6a04a',assoc:'#c27ba0',cert:'#8a8a2a'};
+var TN={alvo:'Alvo',ip:'IP',ns:'Servidor DNS',mail:'E-mail / MX',servico:'Serviço',asn:'ASN',rede:'Prefixo',org:'Organização',pessoa:'Pessoa',email:'E-mail',perfil:'Perfil',site:'Site',local:'Local',vazamento:'Vazamento',dominio:'Domínio',assoc:'Domínio na mesma infraestrutura',cert:'Certificados'};
 function graphData(r,t){
   var N={},E=[];
   function n(label,type){label=String(label==null?'':label).trim();if(!label)return null;var id=type+':'+label.toLowerCase();
@@ -1864,6 +1904,11 @@ function graphData(r,t){
   var c=r.consolidado;if(c){many(root,c.nomes,'pessoa');many(root,c.emails,'email');many(root,c.sites,'site');many(root,c.localizacoes,'local');many(root,c.empresas,'org')}
   var v=r.vazamentos;if(v&&v.vazamentos)v.vazamentos.slice(0,30).forEach(function(x){e(root,n(x.title||x.name,'vazamento'))});
   var tel=r.telefone;if(tel){if(tel.uf)e(root,n(tel.uf,'local'));if(tel.pais)e(root,n(tel.pais,'local'))}
+  var cz=r.cruzada;if(cz){
+    (cz.subdominios||[]).forEach(function(sb){var sn=n(sb.nome,'dominio');e(hub,sn);(sb.ips||[]).forEach(function(ip){e(sn,n(ip,'ip'))})});
+    (cz.ips||[]).forEach(function(x){var ipn=n(x.ip,'ip');e(hub,ipn);if(x.asn){var an=n(x.asn,'asn');e(ipn,an);if(x.provedor)e(an,n(x.provedor,'org'))}(x.dominios||[]).slice(0,x.fraca?5:15).forEach(function(dm){e(ipn,n(dm,'assoc'))})});
+    (cz.emails||[]).forEach(function(m){e(hub,n(m,'email'))});
+    if(cz.certificados&&cz.certificados.total)e(hub,n(cz.certificados.total+' certificados'+(cz.certificados.primeiro?' ('+cz.certificados.primeiro+' a '+cz.certificados.ultimo+')':''),'cert'))}
   var ids=Object.keys(N),nodes=ids.map(function(i){return N[i]}),seen={},edges=E.filter(function(x){var k=x.a.id+'|'+x.b.id;if(seen[k])return false;seen[k]=1;return true});
   nodes.forEach(function(x,i){var an=i/nodes.length*6.283;x.x=Math.cos(an)*(x===root?0:160);x.y=Math.sin(an)*(x===root?0:160)});
   return{nodes:nodes,edges:edges,root:root}}
