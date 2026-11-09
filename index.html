@@ -189,6 +189,9 @@ header.scrolled{background:rgba(0,0,0,.92);box-shadow:0 1px 0 rgba(255,255,255,.
 .df{border-top:1px solid var(--line);padding:8px 0;font-size:.82rem;word-break:break-word}
 .bd{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:600;margin-right:6px;color:#fff}
 .lab .note{color:var(--ink-2);font-size:.8rem}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 20px}
+@media(max-width:1100px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 24px}}
+@media(max-width:640px){.grid4{grid-template-columns:1fr;gap:28px}}
 </style>
 </head>
 <body class="no-js">
@@ -233,6 +236,21 @@ header.scrolled{background:rgba(0,0,0,.92);box-shadow:0 1px 0 rgba(255,255,255,.
       </div>
     </div>
     <div class="res-grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="block" id="inteligencia">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Análise</span>
+      <h2>Inteligência integrada</h2>
+    </div>
+    <div class="grid4">
+      <div class="item reveal"><i class="fa-solid fa-shuffle" aria-hidden="true"></i><h3>Cruzamento automático de resultados</h3><p>Os dados de cada consulta são comparados entre si, sem trabalho manual.</p></div>
+      <div class="item reveal"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i><h3>Grafo de relacionamentos</h3><p>Visualize as conexões entre domínios, IPs, e-mails e outros indicadores.</p></div>
+      <div class="item reveal"><i class="fa-solid fa-server" aria-hidden="true"></i><h3>Identificação de infraestrutura compartilhada</h3><p>Descubra alvos que usam os mesmos IPs, servidores DNS e provedores.</p></div>
+      <div class="item reveal"><i class="fa-solid fa-link" aria-hidden="true"></i><h3>Correlação de evidências</h3><p>Una achados de fontes diferentes para sustentar cada conclusão.</p></div>
+    </div>
   </div>
 </section>
 
@@ -1393,7 +1411,7 @@ function summaryCard(em,c,rep,deps){
    Cada rede tem um status: existe / não existe / não verificável (a rede bloqueia consultas automáticas). */
 function userSearch(u,cf,rep){
   var e=encodeURIComponent(u);
-  var SH=[['Instagram','https://www.instagram.com/'+e,'fa-brands fa-instagram'],['X (Twitter)','https://x.com/'+e,'fa-brands fa-x-twitter'],['Facebook','https://www.facebook.com/'+e,'fa-brands fa-facebook-f'],['LinkedIn','https://www.linkedin.com/in/'+e,'fa-brands fa-linkedin-in'],['Telegram','https://t.me/'+e,'fa-brands fa-telegram'],['TikTok','https://www.tiktok.com/@'+e,'fa-brands fa-tiktok'],['YouTube','https://www.youtube.com/@'+e,'fa-brands fa-youtube'],['GitHub','https://github.com/'+e,'fa-brands fa-github'],['Reddit','https://www.reddit.com/user/'+e,'fa-brands fa-reddit-alien'],['Pinterest','https://www.pinterest.com/'+e,'fa-brands fa-pinterest-p'],['Twitch','https://www.twitch.tv/'+e,'fa-brands fa-twitch'],['Threads','https://www.threads.net/@'+e,'fa-brands fa-threads'],['Kwai','https://www.kwai.com/@'+e,'fa-solid fa-video'],['Linktree','https://linktr.ee/'+e,'fa-solid fa-link']];
+  var SH=[['Instagram','https://www.instagram.com/'+e,'fa-brands fa-instagram'],['X (Twitter)','https://x.com/'+e,'fa-brands fa-x-twitter'],['Facebook','https://www.facebook.com/'+e,'fa-brands fa-facebook-f'],['LinkedIn','https://www.linkedin.com/in/'+e,'fa-brands fa-linkedin-in'],['Telegram','https://t.me/'+e,'fa-brands fa-telegram'],['TikTok','https://www.tiktok.com/@'+e,'fa-brands fa-tiktok'],['YouTube','https://www.youtube.com/@'+e,'fa-brands fa-youtube'],['GitHub','https://github.com/'+e,'fa-brands fa-github'],['Reddit','https://www.reddit.com/user/'+e,'fa-brands fa-reddit-alien'],['Pinterest','https://www.pinterest.com/'+e,'fa-brands fa-pinterest-p'],['Twitch','https://www.twitch.tv/'+e,'fa-brands fa-twitch'],['Threads','https://www.threads.net/@'+e,'fa-brands fa-threads'],['Kwai','https://www.kwai.com/@'+e,'fa-solid fa-video'],['Linktree','https://linktr.ee/'+e,'fa-solid fa-link'],['Snapchat','https://www.snapchat.com/add/'+e,'fa-brands fa-snapchat'],['Spotify','https://open.spotify.com/user/'+e,'fa-brands fa-spotify'],['SoundCloud','https://soundcloud.com/'+e,'fa-brands fa-soundcloud'],['Steam','https://steamcommunity.com/id/'+e,'fa-brands fa-steam'],['Medium','https://medium.com/@'+e,'fa-brands fa-medium'],['Behance','https://www.behance.net/'+e,'fa-brands fa-behance'],['Dribbble','https://dribbble.com/'+e,'fa-brands fa-dribbble'],['Vimeo','https://vimeo.com/'+e,'fa-brands fa-vimeo-v'],['Flickr','https://www.flickr.com/people/'+e,'fa-brands fa-flickr'],['Tumblr','https://'+e+'.tumblr.com','fa-brands fa-tumblr'],['Patreon','https://www.patreon.com/'+e,'fa-brands fa-patreon'],['Kick','https://kick.com/'+e,'fa-solid fa-video'],['npm','https://www.npmjs.com/~'+e,'fa-brands fa-npm'],['Telegram (canal)','https://t.me/s/'+e,'fa-brands fa-telegram']];
   var PRI=['Instagram','Facebook','X (Twitter)','TikTok','Kwai','YouTube','Linktree','Threads'];
   var G=['Pesquisar no Google','https://www.google.com/search?q=%22'+e+'%22','fa-brands fa-google'];
   var shUrl={},shIcon={};SH.forEach(function(x){shUrl[x[0]]=x[1];shIcon[x[0]]=x[2]});
