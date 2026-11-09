@@ -742,6 +742,22 @@ function cnpjFull(d,c,rep){
       });
       c.add(bx);
     }
+    (function(){
+      var piv=[],seen={};
+      function add(q,lab){if(q&&!seen[q]){seen[q]=1;piv.push([q,lab])}}
+      function dvs(b){var w1=[5,4,3,2,9,8,7,6,5,4,3,2],w2=[6,5,4,3,2,9,8,7,6,5,4,3,2],a=b.split('').map(Number);function f(w){var t=0;for(var i=0;i<w.length;i++)t+=a[i]*w[i];var r=t%11;return r<2?0:11-r}var d1=f(w1);a.push(d1);return ''+d1+f(w2)}
+      var dd=String(d).replace(/\D/g,'');
+      if(dd.length===14&&dd.slice(8,12)!=='0001'){var bm=dd.slice(0,8)+'0001';add(bm+dvs(bm),'Matriz')}
+      var em=String(j.email||'').toLowerCase().split('@')[1];
+      if(em&&!/^(gmail|hotmail|outlook|yahoo|icloud|uol|bol|terra|live|msn|ig|globo|globomail|zipmail|oi|r7)\./.test(em))add(em,'Domínio do e-mail cadastral');
+      (j.qsa||[]).forEach(function(q){var x=String(q.cnpj_cpf_do_socio||'').replace(/\D/g,'');if(x.length===14&&cnpjOk(x))add(x,'Sócia: '+(q.nome_socio||'empresa'))});
+      [j.ddd_telefone_1,j.ddd_telefone_2].forEach(function(t,i){var x=String(t||'').replace(/\D/g,'');if(x.length>=10)add(x,'Telefone '+(i+1))});
+      if(!piv.length)return;
+      var h=el('p','note','Pistas para investigar a seguir (clique para pesquisar)');h.style.cssText='margin:16px 0 8px;font-weight:600;color:var(--ink)';c.add(h);
+      var bx=el('div','links');
+      piv.forEach(function(x){var a=el('a',null,x[1]+': '+x[0]);a.href='#';a.setAttribute('role','button');a.addEventListener('click',function(ev){ev.preventDefault();input.value=x[0];input.dispatchEvent(new Event('input'));var f=$('form');if(f.requestSubmit)f.requestSubmit();else f.dispatchEvent(new Event('submit',{cancelable:true}))});bx.appendChild(a)});
+      c.add(bx);
+    })();
     c.note('Fonte: cadastro público da Receita Federal (BrasilAPI, com Minha Receita como reserva). A Receita mascara o CPF dos sócios pessoa física. Dados podem ter defasagem de dias em relação ao comprovante oficial.');
     var raw=JSON.parse(JSON.stringify(j));
     rep.cnpj={cnpj:d,formatado:fm,dados:raw};
