@@ -118,6 +118,10 @@ const INFO={
  'Scratch':j=>jn([j.profile&&j.profile.country,j.history&&j.history.joined?'desde '+yr(j.history.joined):'']),
 };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Workers só mantém 6 conexões abertas por requisição: o resto fica na fila e o timeout de 3 s estourava antes de a consulta sair. O pool só inicia a próxima quando há vaga.
+const pool=async(items,n,fn)=>{const out=new Array(items.length);let i=0;await Promise.all(Array.from({length:Math.min(n,items.length)},async()=>{while(i<items.length){const k=i++;out[k]=await fn(items[k])}}));return out};
+// descarta o corpo não lido para liberar a conexão
+const drop=r=>{try{if(r&&r.body&&!r.body.locked)r.body.cancel()}catch(e){}};
 const dec=s=>s.replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#0?39;|&apos;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s+/g,' ').trim();
 // Nome/bio públicos lidos das meta tags da página do perfil (og:title / og:description)
 function meta(t){const h=t.slice(0,60000),g=p=>{const m=h.match(new RegExp('<meta[^>]+(?:property|name)=["\']'+p+'["\'][^>]*?content=["\']([^"\']*)["\']','i'))||h.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]*?(?:property|name)=["\']'+p+'["\']','i'));return m?dec(m[1]):''};
@@ -129,13 +133,13 @@ async function body(r,n=150000){try{const rd=r.body.getReader(),dc=new TextDecod
 const IGH={'user-agent':'Instagram 275.0.0.27.98 Android (33/13; 420dpi; 1080x2400; samsung; SM-G991B; o1s; exynos2100; pt_BR; 458229237)','x-ig-app-id':'936619743392459','accept':'*/*'};
 const SP={
  'Instagram':async u=>{const r=await fetch('https://i.instagram.com/api/v1/users/web_profile_info/?username='+encodeURIComponent(u),{headers:IGH,signal:AbortSignal.timeout(3000)});
-  if(r.status===404)return{status:'not_found'};if(r.status!==200)return null;
+  if(r.status!==200){drop(r);return r.status===404?{status:'not_found'}:null}
   let j;try{j=await r.json()}catch(e){return null}
   const d=j&&j.data&&j.data.user;
   if(d)return{status:'found',info:jn([d.full_name,d.is_verified?'verificado':'',d.is_private?'privado':'',d.edge_followed_by?d.edge_followed_by.count+' seguidores':'',d.edge_owner_to_timeline_media?d.edge_owner_to_timeline_media.count+' posts':''])};
   return j&&j.data&&j.data.user===null&&j.status==='ok'?{status:'not_found'}:null},
  'X (Twitter)':async u=>{const r=await fetch('https://api.twitter.com/i/users/username_available.json?username='+encodeURIComponent(u),{headers:{'user-agent':UA,'accept':'application/json'},signal:AbortSignal.timeout(3000)});
-  if(r.status!==200)return null;let j;try{j=await r.json()}catch(e){return null}
+  if(r.status!==200){drop(r);return null}let j;try{j=await r.json()}catch(e){return null}
   return j.reason==='taken'?{status:'found'}:(j.reason==='available'&&j.valid===true?{status:'not_found'}:null)}
 };
 async function check(s,u,ctx){
@@ -145,9 +149,9 @@ async function check(s,u,ctx){
   if(SP[s[0]]){let x=null;try{x=await SP[s[0]](u)}catch(e){}return x?{name:s[0],status:x.status,url,info:x.info||''}:{name:s[0],status:'unknown',url}}
   for(let i=0;i<2;i++){
     if(ctx.n>=48)return{name:s[0],status:'unknown',url};
-    ctx.n++;
+    ctx.n++;let r=null;
     try{
-      const r=await fetch(fill(s[1]),{headers:{'User-Agent':UA,'Accept':'text/html,application/json'},redirect:'follow',signal:AbortSignal.timeout(3000)});
+      r=await fetch(fill(s[1]),{headers:{'User-Agent':UA,'Accept':'text/html,application/json'},redirect:'follow',signal:AbortSignal.timeout(3000)});
       if(s[6]){
         if(r.status===s[6])return{name:s[0],status:'found',url};
         if(r.status===200)return{name:s[0],status:'not_found',url};
@@ -178,7 +182,7 @@ async function check(s,u,ctx){
       }
       if(i===0&&(r.status===429||r.status>=500)){await sleep(250);continue}
       return{name:s[0],status:'unknown',url};
-    }catch(e){if(i===0&&e&&e.name!=='TimeoutError'&&e.name!=='AbortError'){await sleep(150);continue}return{name:s[0],status:'unknown',url}}
+    }catch(e){if(i===0&&e&&e.name!=='TimeoutError'&&e.name!=='AbortError'){await sleep(150);continue}return{name:s[0],status:'unknown',url}}finally{drop(r)}
   }
   return{name:s[0],status:'unknown',url};
 }
@@ -235,24 +239,24 @@ const AJ={'user-agent':UA,'accept':'application/json'};
 const ACCOUNTS=[
  ['Microsoft (Outlook / 365)','https://account.microsoft.com/',async e=>{
    const r=await fetch('https://login.microsoftonline.com/common/GetCredentialType?mkt=en-US',{method:'POST',headers:{...AJ,'content-type':'application/json'},body:JSON.stringify({Username:e,isOtherIdpSupported:true,checkPhones:false,isRemoteNGCSupported:false,isCookieBannerShown:false,isFidoSupported:false,originalRequest:'',country:'US',forceotclogin:false,isExternalFederationDisallowed:false,isRemoteConnectSupported:false,federationFlags:0,isSignup:false,flowToken:'',isAccessPassSupported:false}),signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';const v=(await r.json()).IfExistsResult;
+   if(r.status!==200){drop(r);return'unknown'}const v=(await r.json()).IfExistsResult;
    return v===0||v===5||v===6?'found':v===1?'not_found':'unknown'}],
  ['Spotify','https://open.spotify.com/',async e=>{
    const r=await fetch('https://spclient.wg.spotify.com/signup/public/v1/account?validate=1&email='+encodeURIComponent(e),{headers:AJ,signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';const s=(await r.json()).status;
+   if(r.status!==200){drop(r);return'unknown'}const s=(await r.json()).status;
    return s===20?'found':s===1?'not_found':'unknown'}],
  ['Firefox / Mozilla','https://accounts.firefox.com/',async e=>{
    const r=await fetch('https://api.accounts.firefox.com/v1/account/status',{method:'POST',headers:{...AJ,'content-type':'application/json'},body:JSON.stringify({email:e}),signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';const x=(await r.json()).exists;
+   if(r.status!==200){drop(r);return'unknown'}const x=(await r.json()).exists;
    return x===true?'found':x===false?'not_found':'unknown'}],
  ['Pinterest','https://www.pinterest.com/',async e=>{
    const d=encodeURIComponent(JSON.stringify({options:{email:e},context:{}}));
    const r=await fetch('https://www.pinterest.com/_ngjs/resource/EmailExistsResource/get/?source_url=%2F&data='+d,{headers:{...AJ,'x-requested-with':'XMLHttpRequest'},signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';const x=((await r.json()).resource_response||{}).data;
+   if(r.status!==200){drop(r);return'unknown'}const x=((await r.json()).resource_response||{}).data;
    return x===true?'found':'unknown'}],
  ['Duolingo','https://www.duolingo.com/',async e=>{
    const r=await fetch('https://www.duolingo.com/2017-06-30/users?email='+encodeURIComponent(e),{headers:AJ,signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';const u=(await r.json()).users;
+   if(r.status!==200){drop(r);return'unknown'}const u=(await r.json()).users;
    return Array.isArray(u)&&u.length?'found':'unknown'}],
  // Instagram: consulta de "e-mail já em uso" do formulário de cadastro (não envia nada ao dono do e-mail).
  ['Instagram','https://www.instagram.com/',async e=>{
@@ -260,7 +264,7 @@ const ACCOUNTS=[
    const ck=pg.headers.get('set-cookie')||'',m=ck.match(/csrftoken=([^;]+)/);
    if(!m)return'unknown';
    const r=await fetch('https://www.instagram.com/api/v1/web/accounts/web_create_ajax/attempt/',{method:'POST',headers:{'user-agent':UA,'accept':'*/*','content-type':'application/x-www-form-urlencoded','x-csrftoken':m[1],'x-requested-with':'XMLHttpRequest','x-ig-app-id':'936619743392459','referer':'https://www.instagram.com/accounts/emailsignup/','cookie':'csrftoken='+m[1]},body:'email='+encodeURIComponent(e)+'&username=&first_name=&opt_into_one_tap=false',signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';
+   if(r.status!==200){drop(r);return'unknown'}
    let j;try{j=await r.json()}catch(x){return'unknown'}
    const em=j&&j.errors&&j.errors.email;
    if(Array.isArray(em)&&em.some(x=>x&&x.code==='email_is_taken'))return'found';
@@ -269,7 +273,7 @@ const ACCOUNTS=[
  // X (Twitter): endpoint público de disponibilidade de e-mail usado no cadastro.
  ['X (Twitter)','https://x.com/',async e=>{
    const r=await fetch('https://api.twitter.com/i/users/email_available.json?email='+encodeURIComponent(e),{headers:AJ,signal:AbortSignal.timeout(4500)});
-   if(r.status!==200)return'unknown';
+   if(r.status!==200){drop(r);return'unknown'}
    const j=await r.json();
    return j.taken===true?'found':(j.taken===false&&j.valid===true?'not_found':'unknown')}],
  // Facebook, TikTok, Kwai e Threads não oferecem checagem passiva de e-mail (só pelo fluxo de recuperação de senha,
@@ -280,9 +284,9 @@ const ACCOUNTS=[
  ['Threads','https://www.threads.net/',async e=>'unknown']
 ];
 async function accounts(e){
-  return Promise.all(ACCOUNTS.map(async s=>{
+  return pool(ACCOUNTS,6,async s=>{
     try{return{name:s[0],status:await s[2](e),url:s[1]}}catch(err){return{name:s[0],status:'unknown',url:s[1]}}
-  }));
+  });
 }
 
 let torCache={t:0,set:null};
@@ -329,7 +333,7 @@ const core={
       if(!/^[a-zA-Z0-9._-]{2,40}$/.test(u))return J({error:'username inválido'},400);
       const ctx={n:0},kk=+url.searchParams.get('k'),nn=+url.searchParams.get('n');
       const list=nn>1&&kk>=0&&kk<nn?SITES.filter((_,ix)=>ix%nn===kk):SITES;
-      const results=(await Promise.all(list.map(s=>check(s,u,ctx)))).map(r=>({...r,cat:CATOF[r.name]||'Outros'}));
+      const results=(await pool(list,6,s=>check(s,u,ctx))).map(r=>({...r,cat:CATOF[r.name]||'Outros'}));
       if(results.some(r=>r.status==='unknown'))h['Cache-Control']='no-store';
       return J({username:u,results});
     }
@@ -434,14 +438,14 @@ function cors(origin,allow,rid){return{'Access-Control-Allow-Origin':allow.lengt
 const ipTag=ip=>ip.includes(':')?ip.split(':').slice(0,3).join(':')+'::':ip.split('.').slice(0,3).join('.')+'.x';
 
 async function limited(env,ip,route,w){
-  const lim=+(env&&env.RL_POINTS)||120,now=Date.now();
+  const lim=+(env&&env.RL_POINTS)||240,now=Date.now();
   if(RLM.size>5000){for(const [k,v] of RLM)if(v.r<now)RLM.delete(k);if(RLM.size>20000)RLM.clear()}
   let e=RLM.get(ip);if(!e||e.r<now){e={r:now+60000,p:0};RLM.set(ip,e)}
   e.p+=w;if(e.p>lim)return Math.max(1,Math.ceil((e.r-now)/1000));
   if(env&&env.RATE_LIMITER){try{const x=await env.RATE_LIMITER.limit({key:ip+route});if(!x.success)return 30}catch(err){}}
   return 0;
 }
-function acquire(env,ip,rc){if(!rc.heavy)return true;const max=+(env&&env.MAX_CONCURRENT)||16,n=PERIP.get(ip)||0;if(ACTIVE>=max||n>=6)return false;ACTIVE++;PERIP.set(ip,n+1);return true}
+function acquire(env,ip,rc){if(!rc.heavy)return true;const max=+(env&&env.MAX_CONCURRENT)||64,n=PERIP.get(ip)||0;if(ACTIVE>=max||n>=16)return false;ACTIVE++;PERIP.set(ip,n+1);return true}
 function release(ip,rc){if(!rc.heavy)return;ACTIVE=Math.max(0,ACTIVE-1);const n=(PERIP.get(ip)||1)-1;n>0?PERIP.set(ip,n):PERIP.delete(ip)}
 const coalesce=(k,fn)=>{let p=INF.get(k);if(!p){p=fn().finally(()=>INF.delete(k));INF.set(k,p)}return p};
 async function cacheGet(ck){try{const m=await caches.default.match(ck);return m?{s:m.status,t:await m.text(),cc:'public, max-age=300'}:null}catch(e){return null}}
@@ -487,7 +491,7 @@ export default{
         if(!acquire(env,ip,rc))return st=503,out({error:'serviço ocupado, tente de novo em instantes'},503,{'Retry-After':'3'});
         try{r=await coalesce(key,()=>run(req,env,ctx))}finally{release(ip,rc)}
         const ttl=ttlFor(route,rc,r);if(ttl)cachePut(ctx,ck,r,ttl);
-        if(r.s>=502){NEG.set(key,{r,until:Date.now()+15000});if(NEG.size>500)NEG.clear();log('warn','falha_rota',{rid,rota:route,status:r.s})}
+        if(r.s>=502){NEG.set(key,{r,until:Date.now()+4000});if(NEG.size>500)NEG.clear();log('warn','falha_rota',{rid,rota:route,status:r.s})}
       }
       st=r.s;
       return new Response(r.t,{status:r.s,headers:{...H,'Content-Type':'application/json; charset=utf-8','Cache-Control':r.s===200?r.cc:'no-store','X-Cache':cache}});
